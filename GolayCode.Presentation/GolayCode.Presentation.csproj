@@ -20,4 +20,8 @@
     <ItemGroup>
       <ProjectReference Include="..\GolayCode.Core\GolayCode.Core.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="ViewModels\" />
+    </ItemGroup>
 </Project>
