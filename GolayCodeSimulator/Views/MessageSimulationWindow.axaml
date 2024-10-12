@@ -1,0 +1,41 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:GolayCodeSimulator.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Width="800"
+        Height="600"
+        x:Class="GolayCodeSimulator.Views.MessageSimulationWindow"
+        x:DataType="vm:MessageSimulationWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Message Simulation | Golay Code Simulator">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MessageSimulationWindowViewModel/>
+    </Design.DataContext>
+
+    <StackPanel Margin="24">
+        <TextBlock Margin="0 4">Channel bit flip probability:</TextBlock>
+        <TextBox Text="{Binding RawBitFlipProbability}" x:Name="BitFlipProbabilityTextBox" Watermark="Enter bit flip probability between 0 and 1" />
+        
+        <TextBlock Margin="0 12 0 4">Message:</TextBlock>
+        <TextBox Text="{Binding RawMessage}" Watermark="Enter a binary message whose length is a multiple of 12" />
+        
+        <Button Margin="0 12 0 24" Command="{Binding SendMessageCommand}">Send message</Button>
+        
+        <TextBlock Margin="0 4">Encoded message:</TextBlock>
+        <TextBox Text="{Binding EncodedMessage}" IsReadOnly="True" />
+        
+        <TextBlock Margin="0 12 0 4">Message from channel:</TextBlock>
+        <TextBox Text="{Binding RawMessageFromChannel}" />
+        
+        <Button Margin="0 12 0 24" Command="{Binding DecodeMessageCommand}">Decode message</Button>
+        
+        <TextBlock Margin="0 4">Decoded message:</TextBlock>
+        <TextBox IsReadOnly="True" />
+    </StackPanel>
+
+</Window>

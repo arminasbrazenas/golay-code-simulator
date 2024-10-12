@@ -1,15 +1,13 @@
-namespace GolayCode.Core;
+using System;
+using System.Collections.Generic;
 
-public interface IChannel
-{
-    IList<byte> SimulateNoise(IEnumerable<byte> message, double errorProbability);
-}
+namespace GolayCodeSimulator.Core;
 
-public class BinarySymmetricChannel : IChannel
+public class BinarySymmetricChannel
 {
     private static readonly Random Random = new();
     
-    public IList<byte> SimulateNoise(IEnumerable<byte> message, double errorProbability)
+    public IList<byte> SimulateNoise(IEnumerable<byte> message, double bitFlipProbability)
     {
         List<byte> messageFromChannel = [];
 
@@ -20,7 +18,7 @@ public class BinarySymmetricChannel : IChannel
             for (var j = 1; j <= 8; j++)
             {
                 var randomProbability = Random.NextDouble();
-                var isError = randomProbability < errorProbability;
+                var isError = randomProbability < bitFlipProbability;
                 if (isError)
                 {
                     byteFromChannel = FlipBitInByte(byteFromChannel, j);

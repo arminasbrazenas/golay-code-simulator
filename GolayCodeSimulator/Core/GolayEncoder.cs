@@ -1,8 +1,16 @@
-namespace GolayCode.Core;
+using System.Collections.Generic;
+
+namespace GolayCodeSimulator.Core;
 
 public class GolayEncoder
 {
     private const int CodewordLength = 23;
+    private uint[] _generatorMatrix;
+
+    public GolayEncoder()
+    {
+        _generatorMatrix = ComputeGeneratorMatrix();
+    }
     
     private static readonly uint[] GeneratorMatrix = 
     [
@@ -89,22 +97,9 @@ public class GolayEncoder
 
     private static uint CalculateCheckBit(uint informationBits, uint generatorBits)
     {
-        return CountSetBits(informationBits & generatorBits) % 2;
+        return Utilities.CountSetBits(informationBits & generatorBits) % 2;
     }
-
-    private static uint CountSetBits(uint value)
-    {
-        // Brian Kernighan’s Algorithm
-        uint count = 0;
-        while (value > 0)
-        {
-            value &= value - 1;
-            count += 1;
-        }
-
-        return count;
-    }
-
+    
     private static void FlushBuffer(List<byte> encodedMessage, uint buffer, int bufferSize)
     {
         var shift = 24;
@@ -114,5 +109,16 @@ public class GolayEncoder
             bufferSize -= 8;
             shift -= 8;
         }
+    }
+
+    private static uint[] ComputeGeneratorMatrix()
+    {
+        var matrix = new uint[GolayConstants.MessageLength];
+        for (var i = 0; i < GolayConstants.MessageLength; i++)
+        {
+            matrix[i] = GolayConstants.IMatrix[i] | (GolayConstants.BMatrix[i] >> GolayConstants.MessageLength);
+        }
+        
+        return matrix;
     }
 }

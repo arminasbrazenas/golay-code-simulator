@@ -1,4 +1,6 @@
-namespace GolayCode.Core;
+using System.Collections.Generic;
+
+namespace GolayCodeSimulator.Core;
 
 public class GolayDecoder
 {
@@ -27,17 +29,26 @@ public class GolayDecoder
         
         while (true)
         {
-            var block = GetNextBlock();
-            if (!block.HasValue)
+            var codeword = GetNextCodeword();
+            if (!codeword.HasValue)
             {
                 break;
             }
+
+            var oddWeightWord = FormOddWeightWord(codeword.Value);
+            var a = 5;
         }
 
         return decodedMessage;
     }
 
-    private uint? GetNextBlock()
+    private static uint FormOddWeightWord(uint codeword)
+    {
+        var setBitsCount = Utilities.CountSetBits(codeword);
+        return setBitsCount % 2 == 0 ? codeword | (1 << 8) : codeword;
+    }
+
+    private uint? GetNextCodeword()
     {
         uint block = _buffer << (32 - _bufferAvailableBits);
         if (_bufferAvailableBits >= CodewordLength)

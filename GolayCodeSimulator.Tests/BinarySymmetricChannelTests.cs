@@ -1,4 +1,6 @@
-namespace GolayCode.Core.Tests;
+using GolayCodeSimulator.Core;
+
+namespace GolayCodeSimulator.Tests;
 
 public class BinarySymmetricChannelTests
 {

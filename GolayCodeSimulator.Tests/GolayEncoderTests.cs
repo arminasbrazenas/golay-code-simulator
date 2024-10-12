@@ -1,14 +1,16 @@
-namespace GolayCode.Core.Tests;
+using GolayCodeSimulator.Core;
+
+namespace GolayCodeSimulator.Tests;
 
 public class GolayEncoderTests
 {
     [Theory]
     [MemberData(nameof(EncodeTestCaseData))]
-    public void Encode_GivenMessage_EncodesCorrectly(List<byte> inputMessage, List<byte> expectedEncodedMessage)
+    public void Encode_GivenMessage_EncodesCorrectly(List<byte> messageToEncode, List<byte> expectedEncodedMessage)
     {
         var encoder = new GolayEncoder();
 
-        var actualEncodedMessage = encoder.Encode(inputMessage);
+        var actualEncodedMessage = encoder.Encode(messageToEncode);
 
         Assert.Equal(expectedEncodedMessage, actualEncodedMessage);
     }
@@ -27,7 +29,7 @@ public class GolayEncoderTests
         ];
         yield return
         [
-            new List<byte> {0b0000_1100, 0b0111_0000 },
+            new List<byte> { 0b0000_1100, 0b0111_0000 },
             new List<byte> { 0b0000_1100, 0b0111_0110, 0b1000_0000 }
         ];
         yield return
