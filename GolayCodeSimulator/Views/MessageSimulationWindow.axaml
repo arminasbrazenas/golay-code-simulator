@@ -35,7 +35,7 @@
         <Button Margin="0 12 0 24" Command="{Binding DecodeMessageCommand}">Decode message</Button>
         
         <TextBlock Margin="0 4">Decoded message:</TextBlock>
-        <TextBox IsReadOnly="True" />
+        <TextBox Text="{Binding DecodedMessage}" IsReadOnly="True" />
     </StackPanel>
 
 </Window>

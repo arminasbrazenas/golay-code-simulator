@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using GolayCodeSimulator.Core;
 
-namespace GolayCodeSimulator.Utilities;
+namespace GolayCodeSimulator.Helpers;
 
-public class BinaryStringConverter
+public static class BinaryStringConverter
 {
-    public static IList<byte> ToBytes(string binaryString)
+    public static List<byte> ToBytes(string binaryString)
     {
         List<byte> bytes = [];
         byte @byte = 0;
@@ -33,7 +33,7 @@ public class BinaryStringConverter
         return bytes;
     }
 
-    public static string FromBytes(IList<byte> bytes, int multipleOf = GolayConstants.CodewordLength)
+    public static string FromBytes(List<byte> bytes, int multipleOf = Constants.CodewordLength)
     {
         var str = string.Concat(
             bytes.Select(b => 

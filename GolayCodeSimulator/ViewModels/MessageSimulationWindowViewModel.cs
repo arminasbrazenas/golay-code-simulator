@@ -2,7 +2,7 @@
 using System.Windows.Input;
 using Avalonia.Data;
 using GolayCodeSimulator.Core;
-using GolayCodeSimulator.Utilities;
+using GolayCodeSimulator.Helpers;
 using ReactiveUI;
 
 namespace GolayCodeSimulator.ViewModels;
@@ -16,13 +16,12 @@ public partial class MessageSimulationWindowViewModel : ViewModelBase
     private string? _encodedMessage;
     private string? _messageFromChannel;
     private string? _rawMessageFromChannel;
+    private string? _decodedMessage;
 
-    private readonly GolayEncoder _golayEncoder;
     private readonly BinarySymmetricChannel _binarySymmetricChannel;
     
     public MessageSimulationWindowViewModel()
     {
-        _golayEncoder = new GolayEncoder();
         _binarySymmetricChannel = new BinarySymmetricChannel();
         SendMessageCommand = ReactiveCommand.Create(HandleSendMessageCommand);
         DecodeMessageCommand = ReactiveCommand.Create(HandleDecodeMessageCommand);
@@ -68,6 +67,12 @@ public partial class MessageSimulationWindowViewModel : ViewModelBase
         }
     }
 
+    public string DecodedMessage
+    {
+        get => _decodedMessage ?? string.Empty;
+        set => this.RaiseAndSetIfChanged(ref _decodedMessage, value);
+    }
+
     private void HandleSendMessageCommand()
     {
         if (!_bitFlipProbability.HasValue || _message is null)
@@ -76,7 +81,7 @@ public partial class MessageSimulationWindowViewModel : ViewModelBase
         }
         
         var messageBytes = BinaryStringConverter.ToBytes(_message);
-        var encodedMessageBytes = _golayEncoder.Encode(messageBytes);
+        var encodedMessageBytes = GolayEncoder.Encode(messageBytes);
         EncodedMessage = BinaryStringConverter.FromBytes(encodedMessageBytes);
         
         var messageFromChannelBytes = _binarySymmetricChannel.SimulateNoise(encodedMessageBytes, _bitFlipProbability.Value);
@@ -86,6 +91,14 @@ public partial class MessageSimulationWindowViewModel : ViewModelBase
 
     private void HandleDecodeMessageCommand()
     {
+        if (_messageFromChannel is null)
+        {
+            return;
+        }
+
+        var messageFromChannelBytes = BinaryStringConverter.ToBytes(_messageFromChannel);
+        var decodedMessageBytes = GolayDecoder.Decode(messageFromChannelBytes);
+        DecodedMessage = BinaryStringConverter.FromBytes(decodedMessageBytes);
     }
 
     private void ValidateAndSetBitFlipProbability(string value)

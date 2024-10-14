@@ -7,7 +7,7 @@ public class BinarySymmetricChannel
 {
     private static readonly Random Random = new();
     
-    public IList<byte> SimulateNoise(IEnumerable<byte> message, double bitFlipProbability)
+    public List<byte> SimulateNoise(IEnumerable<byte> message, double bitFlipProbability)
     {
         List<byte> messageFromChannel = [];
 

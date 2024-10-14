@@ -1,88 +1,102 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using GolayCodeSimulator.Helpers;
 
 namespace GolayCodeSimulator.Core;
 
 public class GolayDecoder
 {
-    private const int CodewordLength = 23;
+    private static readonly List<uint> TransposedParityCheckMatrix =
+        CalculateParityCheckMatrix().Transpose(columnCount: Constants.InformationLength);
 
-    private IList<byte> _encodedMessage = [];
-    private int _messageBytesRead;
-    private uint _buffer;
-    private int _bufferSize;
-    private int _bufferAvailableBits;
+    private static readonly List<uint> TransposedBMatrix =
+        Constants.BMatrix.ToList().Transpose(columnCount: Constants.InformationLength);
 
-    private void Reset(IList<byte> encodedMessage)
+    public static List<byte> Decode(List<byte> encodedMessage)
     {
-        _encodedMessage = encodedMessage;
-        _messageBytesRead = 0;
-        _buffer = 0;
-        _bufferSize = 0;
-        _bufferAvailableBits = 0;
-    }
+        var bitReader = new BitReader(encodedMessage, Constants.CodewordLength);
+        var bitWriter = new BitWriter(Constants.CodewordLength);
 
-    public IList<byte> Decode(IList<byte> encodedMessage) // dekodavimas nuo 22:45
-    {
-        Reset(encodedMessage);
-
-        List<byte> decodedMessage = [];
-        
         while (true)
         {
-            var codeword = GetNextCodeword();
+            uint? codeword = bitReader.NextBlock();
             if (!codeword.HasValue)
             {
                 break;
             }
 
-            var oddWeightWord = FormOddWeightWord(codeword.Value);
-            var a = 5;
-        }
+            uint oddWeightWord = CalculateOddWeightWord(codeword.Value);
+            uint? errorVector = CalculateErrorVector(oddWeightWord);
 
-        return decodedMessage;
-    }
-
-    private static uint FormOddWeightWord(uint codeword)
-    {
-        var setBitsCount = Utilities.CountSetBits(codeword);
-        return setBitsCount % 2 == 0 ? codeword | (1 << 8) : codeword;
-    }
-
-    private uint? GetNextCodeword()
-    {
-        uint block = _buffer << (32 - _bufferAvailableBits);
-        if (_bufferAvailableBits >= CodewordLength)
-        {
-            _bufferAvailableBits -= CodewordLength;
-        }
-        else
-        {
-            var bitsRead = _bufferAvailableBits;
-            ReadToBuffer();
-            
-            if (bitsRead + _bufferAvailableBits < CodewordLength)
+            if (errorVector.HasValue)
             {
-                return null;
+                uint decodedCodeword = oddWeightWord ^ errorVector.Value;
+                bitWriter.WriteBlock(decodedCodeword);
             }
-            
-            block |= (_buffer >> bitsRead) & 0xFF_FF_FE_00;
-            _bufferAvailableBits -= CodewordLength - bitsRead;
+            else
+            {
+                throw new InvalidOperationException($"Failed to decode: {codeword}");
+            }
         }
-
-        return block;
+        
+        bitWriter.Flush();
+        
+        return bitWriter.Bytes;
     }
 
-    private void ReadToBuffer()
+    private static uint? CalculateErrorVector(uint oddWeightWord)
     {
-        _buffer = 0;
-        _bufferSize = 0;
-        
-        while (_messageBytesRead < _encodedMessage.Count && _bufferSize < 32)
+        uint firstSyndrome = TransposedParityCheckMatrix.TransposedMatrixMultiply(oddWeightWord);
+        if (firstSyndrome.Weight() <= 3)
         {
-            _buffer |= (uint)_encodedMessage[_messageBytesRead++] << (24 - _bufferSize);
-            _bufferSize += 8;
+            return firstSyndrome;
+        }
+        
+        int? rowIndex = FindBMatrixRowIndexWithAdditionWeightLowerOrEqualToTwo(firstSyndrome);
+        if (rowIndex.HasValue)
+        {
+            return (firstSyndrome ^ Constants.BMatrix[rowIndex.Value]) | (uint)(1 << (31 - Constants.InformationLength - rowIndex.Value));
+        }
+        
+        uint secondSyndrome = TransposedBMatrix.TransposedMatrixMultiply(firstSyndrome);
+        if (secondSyndrome.Weight() <= 3)
+        {
+            return secondSyndrome >> Constants.InformationLength;
+        }
+        
+        rowIndex = FindBMatrixRowIndexWithAdditionWeightLowerOrEqualToTwo(secondSyndrome);
+        if (rowIndex.HasValue)
+        {
+            return (uint)(1 << (31 - rowIndex.Value)) | ((secondSyndrome ^ Constants.BMatrix[rowIndex.Value]) >> Constants.InformationLength);
         }
 
-        _bufferAvailableBits = _bufferSize;
+        return null;
+    }
+
+    private static uint CalculateOddWeightWord(uint codeword)
+    {
+        return codeword.Weight() % 2 == 0 ? codeword | (1 << 8) : codeword;
+    }
+    
+    private static int? FindBMatrixRowIndexWithAdditionWeightLowerOrEqualToTwo(uint vector)
+    {
+        for (var i = 0; i < Constants.BMatrix.Length; i++)
+        {
+            uint addedVectors = Constants.BMatrix[i] ^ vector;
+            if (addedVectors.Weight() <= 2)
+            {
+                return i;
+            }
+        }
+
+        return null;
+    }
+
+    private static List<uint> CalculateParityCheckMatrix()
+    {
+        return Constants.IdentityMatrix
+            .Concat(Constants.BMatrix)
+            .ToList();
     }
 }

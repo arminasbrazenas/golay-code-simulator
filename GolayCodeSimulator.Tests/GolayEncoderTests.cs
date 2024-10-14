@@ -8,10 +8,7 @@ public class GolayEncoderTests
     [MemberData(nameof(EncodeTestCaseData))]
     public void Encode_GivenMessage_EncodesCorrectly(List<byte> messageToEncode, List<byte> expectedEncodedMessage)
     {
-        var encoder = new GolayEncoder();
-
-        var actualEncodedMessage = encoder.Encode(messageToEncode);
-
+        var actualEncodedMessage = GolayEncoder.Encode(messageToEncode);
         Assert.Equal(expectedEncodedMessage, actualEncodedMessage);
     }
 
