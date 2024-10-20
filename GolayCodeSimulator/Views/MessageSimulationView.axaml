@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:GolayCodeSimulator.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="GolayCodeSimulator.Views.MessageSimulationView"
+        x:DataType="vm:MessageSimulationViewModel">
+    <Design.DataContext>
+        <vm:MessageSimulationViewModel />
+    </Design.DataContext>
+
+    <StackPanel>
+        <TextBlock Margin="0 4">Channel bit flip probability:</TextBlock>
+        <TextBox Text="{Binding BitFlipProbability}" Watermark="Enter bit flip probability between 0 and 1" />
+        
+        <TextBlock Margin="0 12 0 4">Message:</TextBlock>
+        <TextBox Text="{Binding Message}" Watermark="Enter a binary message whose length is a multiple of 12" />
+        
+        <Button Margin="0 12 0 24" Command="{Binding SendMessageCommand}">Send message</Button>
+        
+        <TextBlock Margin="0 4">Encoded message:</TextBlock>
+        <TextBox Text="{Binding EncodedMessage}" IsEnabled="False" />
+        
+        <TextBlock Margin="0 12 0 4">Message from channel:</TextBlock>
+        <TextBox Text="{Binding MessageFromChannel}" />
+        
+        <TextBlock Text="{Binding ErrorPositionsMessage^}" Margin="0 4" IsVisible="{Binding ErrorPositionsMessage^, TargetNullValue=False}" Foreground="{DynamicResource SystemAccentColor}" />
+        
+        <Button Margin="0 12 0 24" Command="{Binding DecodeMessageCommand}">Decode message</Button>
+        
+        <TextBlock Margin="0 4">Decoded message:</TextBlock>
+        <TextBox Text="{Binding DecodedMessage}" IsEnabled="False" />
+        
+        <TextBlock Margin="0 12 0 4">Decoded message information:</TextBlock>
+        <TextBox Text="{Binding DecodedMessageInformation}" IsEnabled="False" />
+    </StackPanel>
+
+</UserControl>

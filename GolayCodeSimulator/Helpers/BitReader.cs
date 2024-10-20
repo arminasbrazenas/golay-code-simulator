@@ -21,23 +21,27 @@ public class BitReader
 
     public uint? NextBlock()
     {
-        uint block = _buffer << (32 - _unreadBufferSize);
+        uint block = _buffer & _blockMask;
         if (_unreadBufferSize >= _blockSize)
         {
+            _buffer <<= _blockSize;
             _unreadBufferSize -= _blockSize;
         }
         else
         {
-            var bitsRead = _unreadBufferSize;
+            int bitsRead = _unreadBufferSize;
             ReadToBuffer();
             
             if (bitsRead + _unreadBufferSize < _blockSize)
             {
                 return null;
             }
-            
+
+            int bitsToReadFromNewBuffer = _blockSize - bitsRead;
             block |= (_buffer >> bitsRead) & _blockMask;
-            _unreadBufferSize -= _blockSize - bitsRead;
+            
+            _unreadBufferSize -= bitsToReadFromNewBuffer;
+            _buffer <<= bitsToReadFromNewBuffer;
         }
 
         return block;

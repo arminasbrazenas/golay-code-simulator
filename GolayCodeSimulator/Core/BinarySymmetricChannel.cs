@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GolayCodeSimulator.Helpers;
 
 namespace GolayCodeSimulator.Core;
 
@@ -7,21 +8,21 @@ public class BinarySymmetricChannel
 {
     private static readonly Random Random = new();
     
-    public List<byte> SimulateNoise(IEnumerable<byte> message, double bitFlipProbability)
+    public static List<byte> SimulateNoise(IEnumerable<byte> message, double bitFlipProbability)
     {
         List<byte> messageFromChannel = [];
 
-        foreach (var messageByte in message)
+        foreach (byte messageByte in message)
         {
-            var byteFromChannel = messageByte;
+            byte byteFromChannel = messageByte;
             
-            for (var j = 1; j <= 8; j++)
+            for (int j = 0; j < 8; j++)
             {
-                var randomProbability = Random.NextDouble();
-                var isError = randomProbability < bitFlipProbability;
+                double randomProbability = Random.NextDouble();
+                bool isError = randomProbability < bitFlipProbability;
                 if (isError)
                 {
-                    byteFromChannel = FlipBitInByte(byteFromChannel, j);
+                    byteFromChannel = byteFromChannel.FlipBit(j);
                 }
             }
             
@@ -29,10 +30,5 @@ public class BinarySymmetricChannel
         }
 
         return messageFromChannel;
-    }
-
-    private static byte FlipBitInByte(byte value, int position)
-    {
-        return (byte)(value ^ (1 << (8 - position)));
     }
 }

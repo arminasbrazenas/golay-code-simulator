@@ -5,47 +5,35 @@ namespace GolayCodeSimulator.Core;
 
 public class GolayEncoder
 {
-    private static readonly List<uint> TransposedGeneratorMatrix = 
-        CreateGeneratorMatrix().Transpose(columnCount: Constants.CodewordLength);
+    private static readonly Matrix GeneratorMatrix = new(CreateGeneratorMatrix(), columnCount: Constants.CodewordLength);
 
     public static List<byte> Encode(List<byte> message)
     {
-        var bitWriter = new BitWriter(Constants.CodewordLength);
-        var byteOffset = 0;
-        var isOddBlock = true;
+        BitReader bitReader = new(message, Constants.InformationLength);
+        BitWriter bitWriter = new(Constants.CodewordLength);
 
-        while (byteOffset + 1 < message.Count)
+        while (true)
         {
-            var informationBits = GetInformationBits(message, byteOffset, isOddBlock);
-            var codeword = TransposedGeneratorMatrix.TransposedMatrixMultiply(informationBits);
-            bitWriter.WriteBlock(codeword);
+            uint? informationBits = bitReader.NextBlock();
+            if (informationBits is null)
+            {
+                bitWriter.Flush();
+                return bitWriter.Bytes;
+            }
             
-            byteOffset += isOddBlock ? 1 : 2;
-            isOddBlock = !isOddBlock;
+            uint codeword = GeneratorMatrix.Multiply(informationBits.Value);
+            bitWriter.WriteBlock(codeword);
         }
-        
-        bitWriter.Flush();
-        
-        return bitWriter.Bytes;
-    }
-
-    private static uint GetInformationBits(List<byte> message, int byteOffset, bool isOddBlock)
-    {
-        if (isOddBlock)
-        {
-            return ((uint)message[byteOffset] << 24) | ((uint)(message[byteOffset + 1] & 0xF0) << 16);
-        }
-        
-        return ((uint)(message[byteOffset] & 0x0F) << 28) | ((uint)message[byteOffset + 1] << 20);
     }
 
     private static List<uint> CreateGeneratorMatrix()
     {
         List<uint> matrix = [];
-        for (var i = 0; i < Constants.InformationLength; i++)
+        for (int i = 0; i < Constants.InformationLength; i++)
         {
             var row = Constants.IdentityMatrix[i] | (Constants.BMatrix[i] >> Constants.InformationLength);
-            matrix.Add(row.ClearBit(8)); // last bit of B matrix is not used when using perfect Golay code
+            row = row.ClearBit(31 - Constants.CodewordLength); // last bit of B matrix is not used during perfect Golay code encoding
+            matrix.Add(row);
         }
 
         return matrix;

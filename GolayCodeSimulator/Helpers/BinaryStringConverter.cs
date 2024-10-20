@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GolayCodeSimulator.Core;
 
 namespace GolayCodeSimulator.Helpers;
 
@@ -13,9 +12,9 @@ public static class BinaryStringConverter
         byte @byte = 0;
         int shift = 7;
 
-        foreach (var ch in binaryString)
+        foreach (char ch in binaryString)
         {
-            @byte |= (byte)(CharToBit(ch) << shift);
+            @byte |= (byte)(ch.ToBit() << shift);
             
             if (shift-- == 0)
             {
@@ -33,20 +32,20 @@ public static class BinaryStringConverter
         return bytes;
     }
 
-    public static string FromBytes(List<byte> bytes, int multipleOf = Constants.CodewordLength)
+    public static string FromBytes(List<byte> bytes, int multipleOf)
     {
-        var str = string.Concat(
+        string str = string.Concat(
             bytes.Select(b => 
                 Convert.ToString(b, 2).PadLeft(8, '0')
             )
         );
         
-        var charsToRemove = str.Length % multipleOf;
+        int lastNCharsToRemove = str.Length % multipleOf;
         
-        return str[..^charsToRemove];
+        return str[..^lastNCharsToRemove];
     }
 
-    private static byte CharToBit(char ch) => ch switch
+    private static byte ToBit(this char ch) => ch switch
     {
         '0' => 0,
         '1' => 1,

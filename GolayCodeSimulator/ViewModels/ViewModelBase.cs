@@ -2,6 +2,4 @@
 
 namespace GolayCodeSimulator.ViewModels;
 
-public class ViewModelBase : ReactiveObject
-{
-}
+public class ViewModelBase : ReactiveObject;

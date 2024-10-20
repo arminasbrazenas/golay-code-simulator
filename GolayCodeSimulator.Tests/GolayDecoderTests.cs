@@ -29,5 +29,15 @@ public class GolayDecoderTests
             new List<byte> { 0b1001_1011, 0b0110_0110, 0b1010_0100 },
             new List<byte> { 0b1011_1011, 0b0110_0110, 0b1000_0100 }
         ];
+        yield return 
+        [
+            new List<byte> { 0b1010_0110, 0b0100_1111, 0b1010_0000 },
+            new List<byte> { 0b0010_0100, 0b0000_1111, 0b1010_0000 }
+        ];
+        yield return 
+        [
+            new List<byte> { 0b0010_0100, 0b0000_0111, 0b1000_0010 },
+            new List<byte> { 0b0010_0100, 0b0000_1111, 0b1010_0000 }
+        ];
     }
 }

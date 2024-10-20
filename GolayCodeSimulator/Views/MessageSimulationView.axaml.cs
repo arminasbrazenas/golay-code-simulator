@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace GolayCodeSimulator.Views;
 
-public partial class MessageSimulationWindow : Window
+public partial class MessageSimulationView : UserControl
 {
-    public MessageSimulationWindow()
+    public MessageSimulationView()
     {
         InitializeComponent();
     }
