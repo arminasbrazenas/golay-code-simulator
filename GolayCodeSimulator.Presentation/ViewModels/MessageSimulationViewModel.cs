@@ -9,7 +9,7 @@ using ReactiveUI;
 
 namespace GolayCodeSimulator.Presentation.ViewModels;
 
-public partial class MessageSimulationViewModel : ViewModelBase
+public class MessageSimulationViewModel : ViewModelBase
 {
     private string? _bitFlipProbability;
     private string? _message;
@@ -34,7 +34,7 @@ public partial class MessageSimulationViewModel : ViewModelBase
         ErrorPositionsMessage = this.WhenAnyValue(
             vm => vm.EncodedMessage,
             vm => vm.MessageFromChannel,
-            CreateErrorPositionsMessage);
+            SetErrorPositionsMessage);
     }
     
     public ICommand SendMessageCommand { get; }
@@ -114,18 +114,18 @@ public partial class MessageSimulationViewModel : ViewModelBase
         DecodedMessageInformation = BinaryStringConverter.FromBytes(informationBytes, Constants.InformationLength);
     }
 
-    private static string? CreateErrorPositionsMessage(string encodedMessage, string messageFromChannel)
+    private static string? SetErrorPositionsMessage(string encodedMessage, string messageFromChannel)
     {
         if (!GolayEncodedMessageValidator.Validate(messageFromChannel).IsValid || encodedMessage.Length != messageFromChannel.Length)
         {
             return null;
         }
                 
-        var errorPositions = GetErrorPositions(encodedMessage, messageFromChannel);
+        var errorPositions = CalculateErrorPositions(encodedMessage, messageFromChannel);
         return FormatMessageFromErrorPositions(errorPositions);
     }
     
-    private static List<int> GetErrorPositions(string encodedMessage, string messageFromChannel)
+    private static List<int> CalculateErrorPositions(string encodedMessage, string messageFromChannel)
     {
         List<int> errorPositions = [];
         for (var i = 0; i < encodedMessage.Length; i++)
