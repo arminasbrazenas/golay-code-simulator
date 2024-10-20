@@ -28,19 +28,20 @@ public partial class MessageSimulationViewModel : ViewModelBase
         var canDecodeMessage = this.WhenAnyValue(
             vm => vm.MessageFromChannel,
             m => GolayEncodedMessageValidator.Validate(m).IsValid);
-
+        
+        SendMessageCommand = ReactiveCommand.Create(HandleSendMessageCommand, canSendMessage);
+        DecodeMessageCommand = ReactiveCommand.Create(HandleDecodeMessageCommand, canDecodeMessage);
         ErrorPositionsMessage = this.WhenAnyValue(
             vm => vm.EncodedMessage,
             vm => vm.MessageFromChannel,
             CreateErrorPositionsMessage);
-        
-        SendMessageCommand = ReactiveCommand.Create(HandleSendMessageCommand, canSendMessage);
-        DecodeMessageCommand = ReactiveCommand.Create(HandleDecodeMessageCommand, canDecodeMessage);
     }
     
     public ICommand SendMessageCommand { get; }
 
     public ICommand DecodeMessageCommand { get; }
+    
+    public IObservable<string?> ErrorPositionsMessage { get; }
 
     public string BitFlipProbability
     {
@@ -90,29 +91,27 @@ public partial class MessageSimulationViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _decodedMessageInformation, value);
     }
     
-    public IObservable<string?> ErrorPositionsMessage { get; }
-
     private void HandleSendMessageCommand()
     {
         var bitFlipProbability = BitFlipProbability.ParseDoubleCultureInvariant();
         var messageBytes = BinaryStringConverter.ToBytes(Message);
         
-        var encodedMessageBytes = GolayEncoder.Encode(messageBytes);
-        EncodedMessage = BinaryStringConverter.FromBytes(encodedMessageBytes, Constants.CodewordLength);
+        var encodedBytes = GolayEncoder.Encode(messageBytes);
+        EncodedMessage = BinaryStringConverter.FromBytes(encodedBytes, Constants.CodewordLength);
         
-        var messageFromChannelBytes = BinarySymmetricChannel.SimulateNoise(encodedMessageBytes, bitFlipProbability);
-        MessageFromChannel = BinaryStringConverter.FromBytes(messageFromChannelBytes, Constants.CodewordLength);
+        var bytesFromChannel = BinarySymmetricChannel.SimulateNoise(encodedBytes, bitFlipProbability);
+        MessageFromChannel = BinaryStringConverter.FromBytes(bytesFromChannel, Constants.CodewordLength);
     }
 
     private void HandleDecodeMessageCommand()
     {
-        var messageFromChannelBytes = BinaryStringConverter.ToBytes(MessageFromChannel);
+        var bytesFromChannel = BinaryStringConverter.ToBytes(MessageFromChannel);
         
-        var decodedMessageBytes = GolayDecoder.Decode(messageFromChannelBytes);
-        DecodedMessage = BinaryStringConverter.FromBytes(decodedMessageBytes, Constants.CodewordLength);
+        var decodedBytes = GolayDecoder.Decode(bytesFromChannel);
+        DecodedMessage = BinaryStringConverter.FromBytes(decodedBytes, Constants.CodewordLength);
         
-        var decodedInformation = GolayInformationParser.ParseDecodedMessage(decodedMessageBytes);
-        DecodedMessageInformation = BinaryStringConverter.FromBytes(decodedInformation, Constants.InformationLength);
+        var informationBytes = GolayInformationParser.ParseDecodedMessage(decodedBytes);
+        DecodedMessageInformation = BinaryStringConverter.FromBytes(informationBytes, Constants.InformationLength);
     }
 
     private static string? CreateErrorPositionsMessage(string encodedMessage, string messageFromChannel)

@@ -17,7 +17,7 @@
     <ScrollViewer>
         <StackPanel>
             <Menu>
-                <MenuItem Header="Message simulation" Command="{Binding UpdateViewCommand}" CommandParameter="MessageSimulation" />
+                <MenuItem Header="Binary message simulation" Command="{Binding UpdateViewCommand}" CommandParameter="MessageSimulation" />
                 <MenuItem Header="Text simulation" Command="{Binding UpdateViewCommand}" CommandParameter="TextSimulation" />
                 <MenuItem Header="Image simulation" Command="{Binding UpdateViewCommand}" CommandParameter="ImageSimulation" />
             </Menu>

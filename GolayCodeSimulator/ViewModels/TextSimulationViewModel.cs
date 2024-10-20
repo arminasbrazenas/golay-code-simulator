@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Text;
 using System.Windows.Input;
@@ -22,7 +23,7 @@ public class TextSimulationViewModel : ViewModelBase
             vm => vm.Text,
             (p, t) => BitFlipProbabilityValidator.Validate(p).IsValid && GolayTextValidator.Validate(t).IsValid);
         
-        SendTextCommand = ReactiveCommand.Create(HandleSendMessageCommand, canSendText);
+        SendTextCommand = ReactiveCommand.Create(HandleSendTextCommand, canSendText);
     }
     
     public ICommand SendTextCommand { get; }
@@ -59,30 +60,16 @@ public class TextSimulationViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _receivedTextWithEncoding, value);
     }
     
-    private void HandleSendMessageCommand()
+    private void HandleSendTextCommand()
     {
-        var bitFlipProbability = BitFlipProbability.ParseDoubleCultureInvariant();
         var messageBytes = Encoding.UTF8.GetBytes(Text).ToList();
+        var bitFlipProbability = BitFlipProbability.ParseDoubleCultureInvariant();
+        var seed = Guid.NewGuid().GetHashCode();
         
-        var messageFromChannelWithoutEncodingBytes = BinarySymmetricChannel.SimulateNoise(messageBytes, bitFlipProbability);
-        ReceivedTextWithoutEncoding = Encoding.UTF8.GetString(messageFromChannelWithoutEncodingBytes.ToArray());
-
-        var isZeroPaddingNeeded = (messageBytes.Count * 8) % Constants.InformationLength != 0;
-        if (isZeroPaddingNeeded)
-        {
-            messageBytes.Add(0);
-        }
+        var receivedBytesWithoutEncoding = BinarySymmetricChannel.SimulateNoise(messageBytes, bitFlipProbability, seed);
+        ReceivedTextWithoutEncoding = Encoding.UTF8.GetString(receivedBytesWithoutEncoding.ToArray());
         
-        var encodedMessageBytes = GolayEncoder.Encode(messageBytes);
-        var messageFromChannel = BinarySymmetricChannel.SimulateNoise(encodedMessageBytes, bitFlipProbability);
-        var decodedMessageBytes = GolayDecoder.Decode(messageFromChannel);
-        var informationBytes = GolayInformationParser.ParseDecodedMessage(decodedMessageBytes);
-
-        if (messageBytes.Last() == 0)
-        {
-            informationBytes.RemoveAt(informationBytes.Count - 1);
-        }
-        
-        ReceivedTextWithEncoding = Encoding.UTF8.GetString(informationBytes.ToArray());
+        var receivedBytesWithEncoding = SendThroughChannelWithZeroPaddingIfNeeded(messageBytes, bitFlipProbability, seed);
+        ReceivedTextWithEncoding = Encoding.UTF8.GetString(receivedBytesWithEncoding.ToArray());
     }
 }
