@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:GolayCodeSimulator.Presentation.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="GolayCodeSimulator.Presentation.Views.ImageSimulationView"
+        x:DataType="vm:ImageSimulationViewModel">
+    <Design.DataContext>
+        <vm:ImageSimulationViewModel />
+    </Design.DataContext>
+
+    <StackPanel>
+        <TextBlock Margin="0 4">Channel bit flip probability:</TextBlock>
+        <TextBox Text="{Binding BitFlipProbability}" Watermark="Enter bit flip probability between 0 and 1" />
+
+        <Button Click="OpenImageSelectDialog" Margin="0 4">Select image</Button>
+        
+        <Button Command="{Binding SendMessageCommand}" Margin="0 12 0 24">Send</Button>
+        
+        <TextBlock Margin="0 4">Decoded image without error correction:</TextBlock>
+        <TextBox Text="{Binding ReceivedTextWithoutEncoding}" Height="160" AcceptsReturn="True" TextWrapping="Wrap" IsReadOnly="True" />
+        
+        <TextBlock Margin="0 12 0 4">Decoded image with error correction:</TextBlock>
+        <TextBox Text="{Binding ReceivedTextWithEncoding}" Height="160" AcceptsReturn="True" TextWrapping="Wrap" IsReadOnly="True" />
+    </StackPanel>
+
+</UserControl>
