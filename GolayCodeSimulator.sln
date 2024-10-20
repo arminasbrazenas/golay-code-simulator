@@ -1,10 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GolayCodeSimulator.Core.Tests", "GolayCodeSimulator.Core.Tests\GolayCodeSimulator.Core.Tests.csproj", "{10C82A84-D932-4C5B-B29C-3769A0DCF2B8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Tests", "Core.Tests\Core.Tests.csproj", "{10C82A84-D932-4C5B-B29C-3769A0DCF2B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GolayCodeSimulator.Presentation", "GolayCodeSimulator.Presentation\GolayCodeSimulator.Presentation.csproj", "{B644B7D3-A908-4D34-A5C8-43B3673A0D1F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Presentation", "Presentation\Presentation.csproj", "{B644B7D3-A908-4D34-A5C8-43B3673A0D1F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GolayCodeSimulator.Core", "GolayCodeSimulator.Core\GolayCodeSimulator.Core.csproj", "{D87CA5C0-9D33-4B5C-8E11-D101DA4A3A42}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{D87CA5C0-9D33-4B5C-8E11-D101DA4A3A42}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

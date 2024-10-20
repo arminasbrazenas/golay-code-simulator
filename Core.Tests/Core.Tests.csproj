@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
+        <RootNamespace>GolayCodeSimulator.Core.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,6 +20,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\GolayCodeSimulator.Core\GolayCodeSimulator.Core.csproj" />
+      <ProjectReference Include="..\Core\Core.csproj" />
     </ItemGroup>
 </Project>
