@@ -8,18 +8,18 @@ public class GolayEncoder
 
     public static List<byte> Encode(List<byte> message)
     {
-        BitReader bitReader = new(message, Constants.InformationLength);
-        BitWriter bitWriter = new(Constants.CodewordLength);
+        BitReader bitReader = new(message, blockSize: Constants.InformationLength);
+        BitWriter bitWriter = new(blockSize: Constants.CodewordLength);
 
         while (true)
         {
-            uint? informationBits = bitReader.NextBlock();
+            uint? informationBits = bitReader.ReadNextBlock();
             if (informationBits is null)
             {
                 bitWriter.Flush();
                 return bitWriter.Bytes;
             }
-            
+
             uint codeword = GeneratorMatrix.Multiply(informationBits.Value);
             bitWriter.WriteBlock(codeword);
         }

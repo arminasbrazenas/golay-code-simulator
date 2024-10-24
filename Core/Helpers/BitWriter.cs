@@ -4,7 +4,7 @@ public class BitWriter
 {
     private readonly int _blockSize;
     private readonly uint _blockMask;
-    
+
     private uint _buffer;
     private int _bufferSize;
 
@@ -14,7 +14,7 @@ public class BitWriter
         _blockMask = Utilities.CalculateBlockMask(blockSize);
         Bytes = [];
     }
-    
+
     public List<byte> Bytes { get; }
 
     public void WriteBlock(uint value)
@@ -24,7 +24,7 @@ public class BitWriter
 
         uint newBuffer = 0;
         var newBufferSize = 0;
-        
+
         if (_bufferSize + _blockSize <= 32)
         {
             _bufferSize += _blockSize;
@@ -36,7 +36,7 @@ public class BitWriter
             newBuffer = value << bitsWritten;
             newBufferSize = _blockSize - bitsWritten;
         }
-        
+
         if (_bufferSize == 32)
         {
             Flush();
@@ -54,7 +54,7 @@ public class BitWriter
             _bufferSize -= 8;
             shift -= 8;
         }
-        
+
         _buffer = 0;
         _bufferSize = 0;
     }

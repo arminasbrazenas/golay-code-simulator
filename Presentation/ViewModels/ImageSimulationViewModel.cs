@@ -1,5 +1,6 @@
 using System;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,40 +17,41 @@ namespace GolayCodeSimulator.Presentation.ViewModels;
 public class ImageSimulationViewModel : ViewModelBase
 {
     private string? _bitFlipProbability;
-    private byte[]? _originalImageMetadata;
-    private byte[]? _originalImageData;
+    private List<byte>? _originalImageMetadata;
+    private List<byte>? _originalImageData;
     private Bitmap? _originalImage;
-    private Bitmap? _receivedImageWithoutEncoding;
-    private Bitmap? _receivedImageWithEncoding;
-    
+    private Bitmap? _receivedImageWithoutErrorCorrection;
+    private Bitmap? _receivedImageWithErrorCorrection;
+
     public ImageSimulationViewModel()
     {
         var canSendImage = this.WhenAnyValue(
             vm => vm.BitFlipProbability,
             vm => vm.OriginalImage,
-            (p, img) => BitFlipProbabilityValidator.Validate(p).IsValid && img is not null);
+            (p, img) => BitFlipProbabilityValidator.Validate(p).IsValid && img is not null
+        );
 
         SendImageCommand = ReactiveCommand.Create(HandleSendImageCommand, canSendImage);
     }
-    
+
     public ICommand SendImageCommand { get; }
-    
+
     public string BitFlipProbability
     {
         get => _bitFlipProbability ?? string.Empty;
         set => this.RaiseAndSetIfChanged(ref _bitFlipProbability, value);
     }
-    
-    public Bitmap? ReceivedImageWithoutEncoding
+
+    public Bitmap? ReceivedImageWithoutErrorCorrection
     {
-        get => _receivedImageWithoutEncoding;
-        set => this.RaiseAndSetIfChanged(ref _receivedImageWithoutEncoding, value);
+        get => _receivedImageWithoutErrorCorrection;
+        set => this.RaiseAndSetIfChanged(ref _receivedImageWithoutErrorCorrection, value);
     }
 
-    public Bitmap? ReceivedImageWithEncoding
+    public Bitmap? ReceivedImageWithErrorCorrection
     {
-        get => _receivedImageWithEncoding;
-        set => this.RaiseAndSetIfChanged(ref _receivedImageWithEncoding, value);
+        get => _receivedImageWithErrorCorrection;
+        set => this.RaiseAndSetIfChanged(ref _receivedImageWithErrorCorrection, value);
     }
 
     public Bitmap? OriginalImage
@@ -63,36 +65,38 @@ public class ImageSimulationViewModel : ViewModelBase
         var (metadata, data) = await ReadBmpImageFromFile(file);
         _originalImageMetadata = metadata;
         _originalImageData = data;
-        
+
         OriginalImage = new Bitmap(new MemoryStream(metadata.Concat(data).ToArray()));
-        ReceivedImageWithoutEncoding = null;
-        ReceivedImageWithEncoding = null;
+        ReceivedImageWithoutErrorCorrection = null;
+        ReceivedImageWithErrorCorrection = null;
     }
-    
+
     private void HandleSendImageCommand()
     {
         var bitFlipProbability = BitFlipProbability.ParseDoubleCultureInvariant();
         var seed = Guid.NewGuid().GetHashCode();
-        
-        var receivedBytesWithoutEncoding = BinarySymmetricChannel.SimulateNoise(_originalImageData!, bitFlipProbability, seed);
-        ReceivedImageWithoutEncoding = new Bitmap(new MemoryStream(_originalImageMetadata!.Concat(receivedBytesWithoutEncoding).ToArray()));
 
-        var receivedBytesWithEncoding = SendThroughChannelWithZeroPaddingIfNeeded(_originalImageData!.ToList(), bitFlipProbability, seed).ToArray();
-        ReceivedImageWithEncoding = new Bitmap(new MemoryStream(_originalImageMetadata!.Concat(receivedBytesWithEncoding).ToArray()));
+        var dataBytesWithoutErrorCorrection = BinarySymmetricChannel.SimulateNoise(_originalImageData!, bitFlipProbability, seed);
+        var imageBytesWithoutErrorCorrection = _originalImageMetadata!.Concat(dataBytesWithoutErrorCorrection).ToArray();
+        ReceivedImageWithoutErrorCorrection = new Bitmap(new MemoryStream(imageBytesWithoutErrorCorrection));
+
+        var dataBytesWithErrorCorrection = SendThroughChannelWithZeroPaddingIfNeeded(_originalImageData!, bitFlipProbability, seed);
+        var imageBytesWithErrorCorrection = _originalImageMetadata!.Concat(dataBytesWithErrorCorrection).ToArray();
+        ReceivedImageWithErrorCorrection = new Bitmap(new MemoryStream(imageBytesWithErrorCorrection));
     }
-    
-    private static async Task<(byte[], byte[])> ReadBmpImageFromFile(IStorageFile file)
+
+    private static async Task<(List<byte>, List<byte>)> ReadBmpImageFromFile(IStorageFile file)
     {
         await using var stream = await file.OpenReadAsync();
         using var reader = new BinaryReader(stream);
-        
+
         var metadata = reader.ReadBytes(14);
         var dataOffset = BinaryPrimitives.ReadInt32LittleEndian(metadata.Skip(10).ToArray());
         var restMetadata = reader.ReadBytes(dataOffset - 14);
         metadata = metadata.Concat(restMetadata).ToArray();
-        
+
         var data = reader.ReadBytes((int)stream.Length - metadata.Length);
-        
-        return (metadata, data);
+
+        return (metadata.ToList(), data.ToList());
     }
 }

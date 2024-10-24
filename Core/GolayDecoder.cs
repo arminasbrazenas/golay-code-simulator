@@ -7,8 +7,7 @@ public class GolayDecoder
     private static readonly Matrix ParityCheckMatrix =
         new(Constants.IdentityMatrix.Concat(Constants.BMatrix).ToList(), columnCount: Constants.InformationLength);
 
-    private static readonly Matrix BMatrix =                    
-        new(Constants.BMatrix.ToList(), columnCount: Constants.InformationLength);
+    private static readonly Matrix BMatrix = new(Constants.BMatrix.ToList(), columnCount: Constants.InformationLength);
 
     public static List<byte> Decode(List<byte> encodedMessage)
     {
@@ -17,7 +16,7 @@ public class GolayDecoder
 
         while (true)
         {
-            uint? codeword = bitReader.NextBlock();
+            uint? codeword = bitReader.ReadNextBlock();
             if (!codeword.HasValue)
             {
                 bitWriter.Flush();
@@ -38,20 +37,20 @@ public class GolayDecoder
         {
             return firstSyndrome;
         }
-        
+
         var row = BMatrix.FindRowWithLowerOrEqualAdditionWeight(firstSyndrome, 2);
         if (row.HasValue)
         {
             int errorBitIndex = 31 - Constants.InformationLength - row.Value.Index;
             return row.Value.AdditionResult | (uint)(1 << errorBitIndex);
         }
-        
+
         uint secondSyndrome = BMatrix.Multiply(firstSyndrome);
         if (secondSyndrome.Weight() <= 3)
         {
             return secondSyndrome >> Constants.InformationLength;
         }
-        
+
         row = BMatrix.FindRowWithLowerOrEqualAdditionWeight(secondSyndrome, 2);
         if (row.HasValue)
         {

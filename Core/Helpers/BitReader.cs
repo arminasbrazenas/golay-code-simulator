@@ -17,7 +17,7 @@ public class BitReader
         _blockMask = Utilities.CalculateBlockMask(blockSize);
     }
 
-    public uint? NextBlock()
+    public uint? ReadNextBlock()
     {
         uint block = _buffer & _blockMask;
         if (_unreadBufferSize >= _blockSize)
@@ -29,7 +29,7 @@ public class BitReader
         {
             int bitsRead = _unreadBufferSize;
             ReadToBuffer();
-            
+
             if (bitsRead + _unreadBufferSize < _blockSize)
             {
                 return null;
@@ -37,19 +37,19 @@ public class BitReader
 
             int bitsToReadFromNewBuffer = _blockSize - bitsRead;
             block |= (_buffer >> bitsRead) & _blockMask;
-            
+
             _unreadBufferSize -= bitsToReadFromNewBuffer;
             _buffer <<= bitsToReadFromNewBuffer;
         }
 
         return block;
     }
-    
+
     private void ReadToBuffer()
     {
         _buffer = 0;
         _unreadBufferSize = 0;
-        
+
         while (_bytesRead < _bytes.Count && _unreadBufferSize < 32)
         {
             _buffer |= (uint)_bytes[_bytesRead++] << (24 - _unreadBufferSize);

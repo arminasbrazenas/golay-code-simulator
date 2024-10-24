@@ -10,7 +10,7 @@ public static class BitFlipProbabilityValidator
         {
             return ValidationResult.Failure("Bit flip probability is required.");
         }
-            
+
         if (!probability.TryParseDoubleCultureInvariant(out var parsedProbability))
         {
             return ValidationResult.Failure("Bit flip probability must be a number.");

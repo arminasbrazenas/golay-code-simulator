@@ -16,18 +16,14 @@ public partial class ImageSimulationView : UserControl
     {
         var topLevel = TopLevel.GetTopLevel(this)!;
 
-        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-        {
-            Title = "Select a BMP image",
-            AllowMultiple = false,
-            FileTypeFilter =
-            [
-                new FilePickerFileType("BMP image")
-                {
-                    Patterns = ["*.bmp"]
-                }
-            ]
-        });
+        var files = await topLevel.StorageProvider.OpenFilePickerAsync(
+            new FilePickerOpenOptions
+            {
+                Title = "Select a BMP image",
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("BMP image") { Patterns = ["*.bmp"] }],
+            }
+        );
 
         if (files.Count != 1 || !files[0].Name.EndsWith(".bmp"))
         {

@@ -4,13 +4,13 @@ public class Matrix
 {
     private readonly List<uint> _matrix;
     private readonly List<uint> _transposedMatrix;
-    
+
     public Matrix(List<uint> matrix, int columnCount)
     {
         _matrix = matrix;
         _transposedMatrix = Transpose(matrix, columnCount);
     }
-    
+
     public uint Multiply(uint value)
     {
         uint result = 0;
@@ -19,7 +19,7 @@ public class Matrix
             var bit = (value & _transposedMatrix[i]).Weight() % 2;
             result |= bit << (31 - i);
         }
-        
+
         return result;
     }
 
@@ -36,11 +36,11 @@ public class Matrix
 
         return null;
     }
-    
+
     private static List<uint> Transpose(List<uint> matrix, int columnCount)
     {
         List<uint> transposedMatrix = [];
-        
+
         for (var col = 0; col < columnCount; col++)
         {
             uint transposedRow = 0;

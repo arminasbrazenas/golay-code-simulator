@@ -8,15 +8,15 @@ namespace GolayCodeSimulator.Presentation.ViewModels;
 public class MainViewModel : ViewModelBase
 {
     private static readonly Dictionary<string, ViewModelBase> CachedViewModels = new();
-    
-    private ViewModelBase _currentView;    
-    
+
+    private ViewModelBase _currentView;
+
     public MainViewModel()
     {
         _currentView = GetViewModelByName("MessageSimulation");
         UpdateViewCommand = ReactiveCommand.Create<string>(HandleUpdateViewCommand);
     }
-    
+
     public ICommand UpdateViewCommand { get; }
 
     public ViewModelBase CurrentView
@@ -43,11 +43,12 @@ public class MainViewModel : ViewModelBase
         return viewModel;
     }
 
-    private static ViewModelBase CreateViewModelByName(string viewName) => viewName switch
-    {
-        "MessageSimulation" => new MessageSimulationViewModel(),
-        "TextSimulation" => new TextSimulationViewModel(),
-        "ImageSimulation" => new ImageSimulationViewModel(),
-        _ => throw new ArgumentOutOfRangeException(nameof(viewName), viewName, null)
-    };
+    private static ViewModelBase CreateViewModelByName(string viewName) =>
+        viewName switch
+        {
+            "MessageSimulation" => new MessageSimulationViewModel(),
+            "TextSimulation" => new TextSimulationViewModel(),
+            "ImageSimulation" => new ImageSimulationViewModel(),
+            _ => throw new ArgumentOutOfRangeException(nameof(viewName), viewName, null),
+        };
 }

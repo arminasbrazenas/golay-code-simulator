@@ -23,24 +23,20 @@ public class MessageSimulationViewModel : ViewModelBase
         var canSendMessage = this.WhenAnyValue(
             vm => vm.BitFlipProbability,
             vm => vm.Message,
-            (p, m) => BitFlipProbabilityValidator.Validate(p).IsValid && GolayMessageValidator.Validate(m).IsValid);
+            (p, m) => BitFlipProbabilityValidator.Validate(p).IsValid && GolayMessageValidator.Validate(m).IsValid
+        );
 
-        var canDecodeMessage = this.WhenAnyValue(
-            vm => vm.MessageFromChannel,
-            m => GolayEncodedMessageValidator.Validate(m).IsValid);
-        
+        var canDecodeMessage = this.WhenAnyValue(vm => vm.MessageFromChannel, m => GolayEncodedMessageValidator.Validate(m).IsValid);
+
         SendMessageCommand = ReactiveCommand.Create(HandleSendMessageCommand, canSendMessage);
         DecodeMessageCommand = ReactiveCommand.Create(HandleDecodeMessageCommand, canDecodeMessage);
-        ErrorPositionsMessage = this.WhenAnyValue(
-            vm => vm.EncodedMessage,
-            vm => vm.MessageFromChannel,
-            SetErrorPositionsMessage);
+        ErrorPositionsMessage = this.WhenAnyValue(vm => vm.EncodedMessage, vm => vm.MessageFromChannel, SetErrorPositionsMessage);
     }
-    
+
     public ICommand SendMessageCommand { get; }
 
     public ICommand DecodeMessageCommand { get; }
-    
+
     public IObservable<string?> ErrorPositionsMessage { get; }
 
     public string BitFlipProbability
@@ -52,7 +48,7 @@ public class MessageSimulationViewModel : ViewModelBase
             BitFlipProbabilityValidator.Validate(value).ThrowOnFailure();
         }
     }
-    
+
     public string Message
     {
         get => _message ?? string.Empty;
@@ -90,15 +86,15 @@ public class MessageSimulationViewModel : ViewModelBase
         get => _decodedMessageInformation ?? string.Empty;
         set => this.RaiseAndSetIfChanged(ref _decodedMessageInformation, value);
     }
-    
+
     private void HandleSendMessageCommand()
     {
         var bitFlipProbability = BitFlipProbability.ParseDoubleCultureInvariant();
         var messageBytes = BinaryStringConverter.ToBytes(Message);
-        
+
         var encodedBytes = GolayEncoder.Encode(messageBytes);
         EncodedMessage = BinaryStringConverter.FromBytes(encodedBytes, Constants.CodewordLength);
-        
+
         var bytesFromChannel = BinarySymmetricChannel.SimulateNoise(encodedBytes, bitFlipProbability);
         MessageFromChannel = BinaryStringConverter.FromBytes(bytesFromChannel, Constants.CodewordLength);
     }
@@ -106,10 +102,10 @@ public class MessageSimulationViewModel : ViewModelBase
     private void HandleDecodeMessageCommand()
     {
         var bytesFromChannel = BinaryStringConverter.ToBytes(MessageFromChannel);
-        
+
         var decodedBytes = GolayDecoder.Decode(bytesFromChannel);
         DecodedMessage = BinaryStringConverter.FromBytes(decodedBytes, Constants.CodewordLength);
-        
+
         var informationBytes = GolayInformationParser.ParseDecodedMessage(decodedBytes);
         DecodedMessageInformation = BinaryStringConverter.FromBytes(informationBytes, Constants.InformationLength);
     }
@@ -120,11 +116,11 @@ public class MessageSimulationViewModel : ViewModelBase
         {
             return null;
         }
-                
+
         var errorPositions = CalculateErrorPositions(encodedMessage, messageFromChannel);
         return FormatMessageFromErrorPositions(errorPositions);
     }
-    
+
     private static List<int> CalculateErrorPositions(string encodedMessage, string messageFromChannel)
     {
         List<int> errorPositions = [];
@@ -139,10 +135,11 @@ public class MessageSimulationViewModel : ViewModelBase
         return errorPositions;
     }
 
-    private static string FormatMessageFromErrorPositions(List<int> errorPositions) => errorPositions.Count switch
-    {
-        0 => "No errors occurred while sending through channel.",
-        1 => $"1 error occurred while sending through channel at position {errorPositions.First()}.",
-        _ => $"{errorPositions.Count} errors occurred while sending through channel at positions {string.Join(", ", errorPositions)}."
-    };
+    private static string FormatMessageFromErrorPositions(List<int> errorPositions) =>
+        errorPositions.Count switch
+        {
+            0 => "No errors occurred while sending through channel.",
+            1 => $"1 error occurred while sending through channel at position {errorPositions.First()}.",
+            _ => $"{errorPositions.Count} errors occurred while sending through channel at positions {string.Join(", ", errorPositions)}.",
+        };
 }

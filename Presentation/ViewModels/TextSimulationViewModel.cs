@@ -15,19 +15,20 @@ public class TextSimulationViewModel : ViewModelBase
     private string? _text;
     private string? _receivedTextWithoutEncoding;
     private string? _receivedTextWithEncoding;
-    
+
     public TextSimulationViewModel()
     {
         var canSendText = this.WhenAnyValue(
             vm => vm.BitFlipProbability,
             vm => vm.Text,
-            (p, t) => BitFlipProbabilityValidator.Validate(p).IsValid && GolayTextValidator.Validate(t).IsValid);
-        
+            (p, t) => BitFlipProbabilityValidator.Validate(p).IsValid && GolayTextValidator.Validate(t).IsValid
+        );
+
         SendTextCommand = ReactiveCommand.Create(HandleSendTextCommand, canSendText);
     }
-    
+
     public ICommand SendTextCommand { get; }
-    
+
     public string BitFlipProbability
     {
         get => _bitFlipProbability ?? string.Empty;
@@ -59,16 +60,16 @@ public class TextSimulationViewModel : ViewModelBase
         get => _receivedTextWithEncoding ?? string.Empty;
         set => this.RaiseAndSetIfChanged(ref _receivedTextWithEncoding, value);
     }
-    
+
     private void HandleSendTextCommand()
     {
         var messageBytes = Encoding.UTF8.GetBytes(Text).ToList();
         var bitFlipProbability = BitFlipProbability.ParseDoubleCultureInvariant();
         var seed = Guid.NewGuid().GetHashCode();
-        
+
         var receivedBytesWithoutEncoding = BinarySymmetricChannel.SimulateNoise(messageBytes, bitFlipProbability, seed);
         ReceivedTextWithoutEncoding = Encoding.UTF8.GetString(receivedBytesWithoutEncoding.ToArray());
-        
+
         var receivedBytesWithEncoding = SendThroughChannelWithZeroPaddingIfNeeded(messageBytes, bitFlipProbability, seed);
         ReceivedTextWithEncoding = Encoding.UTF8.GetString(receivedBytesWithEncoding.ToArray());
     }

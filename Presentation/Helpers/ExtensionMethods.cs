@@ -10,7 +10,7 @@ public static class ExtensionMethods
         probability = probability.Replace(',', '.');
         return double.TryParse(probability, CultureInfo.InvariantCulture, out parsedProbability);
     }
-    
+
     public static double ParseDoubleCultureInvariant(this string probability)
     {
         var isSuccess = TryParseDoubleCultureInvariant(probability, out var parsedProbability);

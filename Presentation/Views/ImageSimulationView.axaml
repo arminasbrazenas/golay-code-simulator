@@ -24,13 +24,13 @@
                 <TextBlock>Original image:</TextBlock>
                 <Image Source="{Binding OriginalImage}" />
             </StackPanel>
-            <StackPanel Grid.Column="2" Spacing="4" IsVisible="{Binding ReceivedImageWithoutEncoding, TargetNullValue=False}">
+            <StackPanel Grid.Column="2" Spacing="4" IsVisible="{Binding ReceivedImageWithoutErrorCorrection, TargetNullValue=False}">
                 <TextBlock>Decoded image without error correction:</TextBlock>
-                <Image Source="{Binding ReceivedImageWithoutEncoding}" />
+                <Image Source="{Binding ReceivedImageWithoutErrorCorrection}" />
             </StackPanel>
-            <StackPanel Grid.Column="4" Spacing="4" IsVisible="{Binding ReceivedImageWithEncoding, TargetNullValue=False}">
+            <StackPanel Grid.Column="4" Spacing="4" IsVisible="{Binding ReceivedImageWithErrorCorrection, TargetNullValue=False}">
                 <TextBlock>Decoded image with error correction:</TextBlock>
-                <Image Source="{Binding ReceivedImageWithEncoding}" />
+                <Image Source="{Binding ReceivedImageWithErrorCorrection}" />
             </StackPanel>
         </Grid>
     </StackPanel>

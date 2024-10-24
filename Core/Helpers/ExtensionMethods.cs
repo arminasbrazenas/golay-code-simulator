@@ -20,12 +20,9 @@ public static class ExtensionMethods
         return count;
     }
 
-    public static bool IsBitSet(this uint value, int bitIndex) =>
-        (value & (1 << bitIndex)) != 0;
-    
-    public static uint ClearBit(this uint value, int bitIndex) =>
-        (uint)(value & ~(1 << bitIndex));
+    public static bool IsBitSet(this uint value, int bitIndex) => (value & (1 << bitIndex)) != 0;
 
-    public static byte FlipBit(this byte value, int bitIndex) =>
-        (byte)(value ^ (1 << (7 - bitIndex)));
+    public static uint ClearBit(this uint value, int bitIndex) => (uint)(value & ~(1 << bitIndex));
+
+    public static byte FlipBit(this byte value, int bitIndex) => (byte)(value ^ (1 << (7 - bitIndex)));
 }
