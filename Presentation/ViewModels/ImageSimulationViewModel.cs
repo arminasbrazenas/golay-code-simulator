@@ -1,6 +1,11 @@
+using System;
+using System.Buffers.Binary;
+using System.IO;
 using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform.Storage;
 using GolayCodeSimulator.Core;
 using GolayCodeSimulator.Presentation.Helpers;
 using GolayCodeSimulator.Presentation.Validation;
@@ -11,82 +16,83 @@ namespace GolayCodeSimulator.Presentation.ViewModels;
 public class ImageSimulationViewModel : ViewModelBase
 {
     private string? _bitFlipProbability;
-    private string? _text;
-    private string? _receivedTextWithoutEncoding;
-    private string? _receivedTextWithEncoding;
+    private byte[]? _originalImageMetadata;
+    private byte[]? _originalImageData;
+    private Bitmap? _originalImage;
+    private Bitmap? _receivedImageWithoutEncoding;
+    private Bitmap? _receivedImageWithEncoding;
     
     public ImageSimulationViewModel()
     {
-        var canSendMessage = this.WhenAnyValue(
+        var canSendImage = this.WhenAnyValue(
             vm => vm.BitFlipProbability,
-            vm => vm.Text,
-            (p, t) => BitFlipProbabilityValidator.Validate(p).IsValid && GolayTextValidator.Validate(t).IsValid);
+            vm => vm.OriginalImage,
+            (p, img) => BitFlipProbabilityValidator.Validate(p).IsValid && img is not null);
 
-        SelectImageCommand = ReactiveCommand.Create(HandleSelectImageCommand);
-        SendMessageCommand = ReactiveCommand.Create(HandleSendMessageCommand, canSendMessage);
+        SendImageCommand = ReactiveCommand.Create(HandleSendImageCommand, canSendImage);
     }
     
-    public ICommand SelectImageCommand { get; }
-    
-    public ICommand SendMessageCommand { get; }
+    public ICommand SendImageCommand { get; }
     
     public string BitFlipProbability
     {
         get => _bitFlipProbability ?? string.Empty;
         set => this.RaiseAndSetIfChanged(ref _bitFlipProbability, value);
     }
-
-    public string Text
+    
+    public Bitmap? ReceivedImageWithoutEncoding
     {
-        get => _text ?? string.Empty;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _text, value);
-            GolayTextValidator.Validate(value).ThrowOnFailure();
-        }
+        get => _receivedImageWithoutEncoding;
+        set => this.RaiseAndSetIfChanged(ref _receivedImageWithoutEncoding, value);
     }
 
-    public string ReceivedTextWithoutEncoding
+    public Bitmap? ReceivedImageWithEncoding
     {
-        get => _receivedTextWithoutEncoding ?? string.Empty;
-        set => this.RaiseAndSetIfChanged(ref _receivedTextWithoutEncoding, value);
+        get => _receivedImageWithEncoding;
+        set => this.RaiseAndSetIfChanged(ref _receivedImageWithEncoding, value);
     }
 
-    public string ReceivedTextWithEncoding
+    public Bitmap? OriginalImage
     {
-        get => _receivedTextWithEncoding ?? string.Empty;
-        set => this.RaiseAndSetIfChanged(ref _receivedTextWithEncoding, value);
+        get => _originalImage;
+        set => this.RaiseAndSetIfChanged(ref _originalImage, value);
     }
 
-    private async void HandleSelectImageCommand()
+    public async Task LoadBmpImageFromFile(IStorageFile file)
     {
-       
+        var (metadata, data) = await ReadBmpImageFromFile(file);
+        _originalImageMetadata = metadata;
+        _originalImageData = data;
+        
+        OriginalImage = new Bitmap(new MemoryStream(metadata.Concat(data).ToArray()));
+        ReceivedImageWithoutEncoding = null;
+        ReceivedImageWithEncoding = null;
     }
     
-    private void HandleSendMessageCommand()
+    private void HandleSendImageCommand()
     {
         var bitFlipProbability = BitFlipProbability.ParseDoubleCultureInvariant();
-        var messageBytes = Encoding.UTF8.GetBytes(Text).ToList();
+        var seed = Guid.NewGuid().GetHashCode();
         
-        var messageFromChannelWithoutEncodingBytes = BinarySymmetricChannel.SimulateNoise(messageBytes, bitFlipProbability);
-        ReceivedTextWithoutEncoding = Encoding.UTF8.GetString(messageFromChannelWithoutEncodingBytes.ToArray());
+        var receivedBytesWithoutEncoding = BinarySymmetricChannel.SimulateNoise(_originalImageData!, bitFlipProbability, seed);
+        ReceivedImageWithoutEncoding = new Bitmap(new MemoryStream(_originalImageMetadata!.Concat(receivedBytesWithoutEncoding).ToArray()));
 
-        var isZeroPaddingNeeded = (messageBytes.Count * 8) % Constants.InformationLength != 0;
-        if (isZeroPaddingNeeded)
-        {
-            messageBytes.Add(0);
-        }
+        var receivedBytesWithEncoding = SendThroughChannelWithZeroPaddingIfNeeded(_originalImageData!.ToList(), bitFlipProbability, seed).ToArray();
+        ReceivedImageWithEncoding = new Bitmap(new MemoryStream(_originalImageMetadata!.Concat(receivedBytesWithEncoding).ToArray()));
+    }
+    
+    private static async Task<(byte[], byte[])> ReadBmpImageFromFile(IStorageFile file)
+    {
+        await using var stream = await file.OpenReadAsync();
+        using var reader = new BinaryReader(stream);
         
-        var encodedMessageBytes = GolayEncoder.Encode(messageBytes);
-        var messageFromChannel = BinarySymmetricChannel.SimulateNoise(encodedMessageBytes, bitFlipProbability);
-        var decodedMessageBytes = GolayDecoder.Decode(messageFromChannel);
-        var informationBytes = GolayInformationParser.ParseDecodedMessage(decodedMessageBytes);
-
-        if (messageBytes.Last() == 0)
-        {
-            informationBytes.RemoveAt(informationBytes.Count - 1);
-        }
+        var metadata = reader.ReadBytes(14);
+        var dataOffset = BinaryPrimitives.ReadInt32LittleEndian(metadata.Skip(10).ToArray());
+        var restMetadata = reader.ReadBytes(dataOffset - 14);
+        metadata = metadata.Concat(restMetadata).ToArray();
         
-        ReceivedTextWithEncoding = Encoding.UTF8.GetString(informationBytes.ToArray());
+        var data = reader.ReadBytes((int)stream.Length - metadata.Length);
+        
+        return (metadata, data);
     }
 }

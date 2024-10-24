@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using GolayCodeSimulator.Presentation.ViewModels;
 
 namespace GolayCodeSimulator.Presentation.Views;
 
@@ -17,11 +18,23 @@ public partial class ImageSimulationView : UserControl
 
         var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Select an image",
+            Title = "Select a BMP image",
             AllowMultiple = false,
-            FileTypeFilter = [FilePickerFileTypes.ImageAll]
+            FileTypeFilter =
+            [
+                new FilePickerFileType("BMP image")
+                {
+                    Patterns = ["*.bmp"]
+                }
+            ]
         });
 
-        var a = 5;
+        if (files.Count != 1 || !files[0].Name.EndsWith(".bmp"))
+        {
+            return;
+        }
+
+        var dataContext = (ImageSimulationViewModel)DataContext!;
+        await dataContext.LoadBmpImageFromFile(files[0]);
     }
 }

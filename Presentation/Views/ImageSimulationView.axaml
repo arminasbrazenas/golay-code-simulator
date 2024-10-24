@@ -14,15 +14,24 @@
         <TextBlock Margin="0 4">Channel bit flip probability:</TextBlock>
         <TextBox Text="{Binding BitFlipProbability}" Watermark="Enter bit flip probability between 0 and 1" />
 
-        <Button Click="OpenImageSelectDialog" Margin="0 4">Select image</Button>
-        
-        <Button Command="{Binding SendMessageCommand}" Margin="0 12 0 24">Send image</Button>
-        
-        <TextBlock Margin="0 4">Decoded image without error correction:</TextBlock>
-        <TextBox Text="{Binding ReceivedTextWithoutEncoding}" Height="160" AcceptsReturn="True" TextWrapping="Wrap" IsReadOnly="True" />
-        
-        <TextBlock Margin="0 12 0 4">Decoded image with error correction:</TextBlock>
-        <TextBox Text="{Binding ReceivedTextWithEncoding}" Height="160" AcceptsReturn="True" TextWrapping="Wrap" IsReadOnly="True" />
-    </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0 8" Spacing="4">
+            <Button Click="OpenImageSelectDialog">Select image</Button>
+            <Button Command="{Binding SendImageCommand}">Send image</Button>
+        </StackPanel>
 
+        <Grid ColumnDefinitions="*,8,*,8,*" Margin="0 4">
+            <StackPanel Grid.Column="0" Spacing="4" IsVisible="{Binding OriginalImage, TargetNullValue=False}">
+                <TextBlock>Original image:</TextBlock>
+                <Image Source="{Binding OriginalImage}" />
+            </StackPanel>
+            <StackPanel Grid.Column="2" Spacing="4" IsVisible="{Binding ReceivedImageWithoutEncoding, TargetNullValue=False}">
+                <TextBlock>Decoded image without error correction:</TextBlock>
+                <Image Source="{Binding ReceivedImageWithoutEncoding}" />
+            </StackPanel>
+            <StackPanel Grid.Column="4" Spacing="4" IsVisible="{Binding ReceivedImageWithEncoding, TargetNullValue=False}">
+                <TextBlock>Decoded image with error correction:</TextBlock>
+                <Image Source="{Binding ReceivedImageWithEncoding}" />
+            </StackPanel>
+        </Grid>
+    </StackPanel>
 </UserControl>
