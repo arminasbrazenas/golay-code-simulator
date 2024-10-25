@@ -10,9 +10,9 @@ public static class BinaryStringConverter
     {
         List<byte> bytes = [];
         byte @byte = 0;
-        int shift = 7;
+        var shift = 7;
 
-        foreach (char ch in binaryString)
+        foreach (var ch in binaryString)
         {
             @byte |= (byte)(ch.ToBit() << shift);
 
@@ -34,9 +34,9 @@ public static class BinaryStringConverter
 
     public static string FromBytes(List<byte> bytes, int multipleOf)
     {
-        string str = string.Concat(bytes.Select(b => Convert.ToString(b, 2).PadLeft(8, '0')));
+        var str = string.Concat(bytes.Select(b => Convert.ToString(b, 2).PadLeft(8, '0')));
 
-        int lastNCharsToRemove = str.Length % multipleOf;
+        var lastNCharsToRemove = str.Length % multipleOf;
 
         return str[..^lastNCharsToRemove];
     }
