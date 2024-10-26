@@ -11,7 +11,7 @@
     </Design.DataContext>
 
     <StackPanel>
-        <TextBlock Margin="0 4">Channel bit flip probability:</TextBlock>
+        <TextBlock Margin="0 0 0 4">Channel bit flip probability:</TextBlock>
         <TextBox Text="{Binding BitFlipProbability}" Watermark="Enter bit flip probability between 0 and 1" />
         
         <TextBlock Margin="0 12 0 4">Text:</TextBlock>
@@ -19,11 +19,15 @@
         
         <Button Command="{Binding SendTextCommand}" Margin="0 12 0 24">Send text</Button>
         
-        <TextBlock Margin="0 4">Received text without error correction:</TextBlock>
-        <TextBox Text="{Binding ReceivedTextWithoutErrorCorrection}" Height="120" AcceptsReturn="True" TextWrapping="Wrap" IsEnabled="False" />
+        <StackPanel Margin="0 4 0 0" IsVisible="{Binding ReceivedTextWithoutErrorCorrection, TargetNullValue=False}">
+            <TextBlock Margin="0 0 0 4">Received text without error correction:</TextBlock>
+            <TextBlock Text="{Binding ReceivedTextWithoutErrorCorrection}" TextWrapping="Wrap" Opacity="0.5" />
+        </StackPanel>
         
-        <TextBlock Margin="0 12 0 4">Received text with error correction:</TextBlock>
-        <TextBox Text="{Binding ReceivedTextWithErrorCorrection}" Height="120" AcceptsReturn="True" TextWrapping="Wrap" IsEnabled="False" />
+        <StackPanel Margin="0 24 0 0" IsVisible="{Binding ReceivedTextWithErrorCorrection, TargetNullValue=False}">
+            <TextBlock Margin="0 0 0 4">Received text with error correction:</TextBlock>
+            <TextBlock Text="{Binding ReceivedTextWithErrorCorrection}" TextWrapping="Wrap" Opacity="0.5" />
+        </StackPanel>
     </StackPanel>
 
 </UserControl>

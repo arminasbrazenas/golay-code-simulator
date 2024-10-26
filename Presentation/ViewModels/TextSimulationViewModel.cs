@@ -49,15 +49,15 @@ public class TextSimulationViewModel : ViewModelBase
         }
     }
 
-    public string ReceivedTextWithoutErrorCorrection
+    public string? ReceivedTextWithoutErrorCorrection
     {
-        get => _receivedTextWithoutErrorCorrection ?? string.Empty;
+        get => _receivedTextWithoutErrorCorrection;
         set => this.RaiseAndSetIfChanged(ref _receivedTextWithoutErrorCorrection, value);
     }
 
-    public string ReceivedTextWithErrorCorrection
+    public string? ReceivedTextWithErrorCorrection
     {
-        get => _receivedTextWithErrorCorrection ?? string.Empty;
+        get => _receivedTextWithErrorCorrection;
         set => this.RaiseAndSetIfChanged(ref _receivedTextWithErrorCorrection, value);
     }
 
