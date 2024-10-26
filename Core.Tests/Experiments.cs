@@ -13,7 +13,7 @@ public class Experiments
     }
 
     [Fact]
-    public void CorrectDecodingProbabilityAsBitFlipProbabilityIncreases()
+    public void ProbabilityOfCorrectDecodingAsBitFlipProbabilityIncreases()
     {
         double bitFlipProbability = 0;
         const double delta = 0.005;
@@ -37,9 +37,9 @@ public class Experiments
                 }
             }
 
-            var correctDecodingChance = correctDecodingCount / trialsPerProbability * 100;
+            var correctDecodingProbability = correctDecodingCount / trialsPerProbability;
             _testOutputHelper.WriteLine(
-                $"Bit flip probability: {bitFlipProbability:F3}; " + $"Chance of correct decoding: {correctDecodingChance:F3}%"
+                $"Bit flip probability: {bitFlipProbability:F3}; " + $"Probability of correct decoding: {correctDecodingProbability:F3}"
             );
 
             bitFlipProbability += delta;
@@ -51,31 +51,37 @@ public class Experiments
     {
         List<byte> message = [];
         Random random = new();
-        var nextBytes = new byte[300_000];
+        var nextBytes = new byte[30000];
         const double bitFlipProbability = 0.1;
+        const double trialsPerMessageSize = 10;
 
         for (var i = 0; i < 12; i++)
         {
             random.NextBytes(nextBytes);
             message.AddRange(nextBytes);
 
-            var encodingStopwatch = Stopwatch.StartNew();
-            var encodedBytes = GolayEncoder.Encode(message);
-            encodingStopwatch.Stop();
+            double encodingMilliseconds = 0, decodingMilliseconds = 0;
 
-            var channelStopwatch = Stopwatch.StartNew();
-            var bytesFromChannel = BinarySymmetricChannel.SimulateSending(encodedBytes, bitFlipProbability);
-            channelStopwatch.Stop();
+            for (var j = 0; j < trialsPerMessageSize; j++)
+            {
+                var encodingStopwatch = Stopwatch.StartNew();
+                var encodedBytes = GolayEncoder.Encode(message);
+                encodingStopwatch.Stop();
 
-            var decodingStopwatch = Stopwatch.StartNew();
-            GolayDecoder.Decode(bytesFromChannel);
-            decodingStopwatch.Stop();
+                var bytesFromChannel = BinarySymmetricChannel.SimulateSending(encodedBytes, bitFlipProbability);
 
+                var decodingStopwatch = Stopwatch.StartNew();
+                GolayDecoder.Decode(bytesFromChannel);
+                decodingStopwatch.Stop();
+
+                encodingMilliseconds += encodingStopwatch.ElapsedMilliseconds;
+                decodingMilliseconds += decodingStopwatch.ElapsedMilliseconds;
+            }
+            
             _testOutputHelper.WriteLine(
                 $"Message size: {message.Count} bytes; "
-                    + $"Encoding: {encodingStopwatch.ElapsedMilliseconds} ms; "
-                    + $"Sending through channel: {channelStopwatch.ElapsedMilliseconds} ms; "
-                    + $"Decoding: {channelStopwatch.ElapsedMilliseconds} ms"
+                + $"Encoding: {encodingMilliseconds / trialsPerMessageSize} ms; "
+                + $"Decoding: {decodingMilliseconds / trialsPerMessageSize} ms"
             );
         }
     }
