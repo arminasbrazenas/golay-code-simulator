@@ -16,8 +16,8 @@ public class Experiments
     public void CorrectDecodingProbabilityAsBitFlipProbabilityIncreases()
     {
         double bitFlipProbability = 0;
-        const double delta = 0.005,
-            trialsPerProbability = 1000;
+        const double delta = 0.005;
+        const double trialsPerProbability = 5000;
         List<byte> message = [0b0011_1110, 0b1110_0000];
 
         while (bitFlipProbability < 1)
