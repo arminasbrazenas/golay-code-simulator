@@ -26,6 +26,7 @@ public class GolayEncoder
             }
 
             uint codeword = GeneratorMatrix.Multiply(informationBits.Value);
+
             bitWriter.WriteBlock(codeword);
         }
     }
