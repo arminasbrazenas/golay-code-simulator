@@ -10,7 +10,7 @@ public class Matrix
         _matrix = matrix;
         _transposedMatrix = Transpose(matrix, columnCount);
     }
-    
+
     /// <summary>
     /// Multiplies the given value by a matrix.
     /// </summary>

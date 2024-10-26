@@ -145,7 +145,7 @@ public class MessageSimulationViewModel : ViewModelBase
         {
             return [];
         }
-        
+
         List<int> errorPositions = [];
         for (var i = 0; i < encodedMessage.Length; i++)
         {

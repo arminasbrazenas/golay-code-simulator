@@ -31,7 +31,7 @@ public class GolayDecoder
             uint oddWeightWord = FormOddWeightWord(word.Value);
             uint errorVector = CalculateErrorVector(oddWeightWord);
             uint decodedCodeword = oddWeightWord ^ errorVector;
-            
+
             bitWriter.WriteBlock(decodedCodeword);
         }
     }
@@ -45,7 +45,7 @@ public class GolayDecoder
     {
         // Step 1: Compute the first syndrome
         uint firstSyndrome = ParityCheckMatrix.Multiply(oddWeightWord);
-        
+
         // Step 2: Check if the first syndrome's weight is <= 3
         if (firstSyndrome.Weight() <= 3)
         {
@@ -64,7 +64,7 @@ public class GolayDecoder
 
         // Step 4: Compute the second syndrome
         uint secondSyndrome = BMatrix.Multiply(firstSyndrome);
-        
+
         // Step 5: Check if the second syndrome's weight is <= 3
         if (secondSyndrome.Weight() <= 3)
         {
@@ -89,6 +89,5 @@ public class GolayDecoder
     /// </summary>
     /// <param name="word">Word to append the digit to.</param>
     /// <returns>The formed word with an odd weight.</returns>
-    private static uint FormOddWeightWord(uint word) =>
-        word.Weight() % 2 != 0 ? word : word | (1 << (31 - Constants.CodewordLength));
+    private static uint FormOddWeightWord(uint word) => word.Weight() % 2 != 0 ? word : word | (1 << (31 - Constants.CodewordLength));
 }
