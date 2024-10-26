@@ -70,7 +70,7 @@ public class TextSimulationViewModel : ViewModelBase
         var bitFlipProbability = BitFlipProbability.ParseDoubleCultureInvariant();
         var seed = Guid.NewGuid().GetHashCode();
 
-        var bytesWithoutErrorCorrection = BinarySymmetricChannel.Simulate(messageBytes, bitFlipProbability, seed);
+        var bytesWithoutErrorCorrection = BinarySymmetricChannel.SimulateSending(messageBytes, bitFlipProbability, seed);
         ReceivedTextWithoutErrorCorrection = Encoding.UTF8.GetString(bytesWithoutErrorCorrection.ToArray());
 
         var bytesWithErrorCorrection = SimulationManager.SendThroughChannel(messageBytes, bitFlipProbability, seed);

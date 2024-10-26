@@ -98,7 +98,7 @@ public class MessageSimulationViewModel : ViewModelBase
         var encodedBytes = GolayEncoder.Encode(messageBytes);
         EncodedMessage = BinaryStringConverter.FromBytes(encodedBytes, multipleOf: Constants.CodewordLength);
 
-        var bytesFromChannel = BinarySymmetricChannel.Simulate(encodedBytes, bitFlipProbability);
+        var bytesFromChannel = BinarySymmetricChannel.SimulateSending(encodedBytes, bitFlipProbability);
         MessageFromChannel = BinaryStringConverter.FromBytes(bytesFromChannel, multipleOf: Constants.CodewordLength);
     }
 
