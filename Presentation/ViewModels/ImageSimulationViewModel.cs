@@ -31,7 +31,7 @@ public class ImageSimulationViewModel : ViewModelBase
             (p, img) => BitFlipProbabilityValidator.Validate(p).IsValid && img is not null
         );
 
-        SendImageCommand = ReactiveCommand.Create(HandleSendImageCommand, canSendImage);
+        SendImageCommand = ReactiveCommand.Create(SendImage, canSendImage);
     }
 
     public ICommand SendImageCommand { get; }
@@ -71,7 +71,7 @@ public class ImageSimulationViewModel : ViewModelBase
         ReceivedImageWithErrorCorrection = null;
     }
 
-    private void HandleSendImageCommand()
+    private void SendImage()
     {
         var bitFlipProbability = BitFlipProbability.ParseDoubleCultureInvariant();
         var seed = Guid.NewGuid().GetHashCode();
@@ -80,12 +80,12 @@ public class ImageSimulationViewModel : ViewModelBase
         var imageBytesWithoutErrorCorrection = _originalImageMetadata!.Concat(dataBytesWithoutErrorCorrection).ToArray();
         ReceivedImageWithoutErrorCorrection = new Bitmap(new MemoryStream(imageBytesWithoutErrorCorrection));
 
-        var dataBytesWithErrorCorrection = SendThroughChannelWithZeroPaddingIfNeeded(_originalImageData!, bitFlipProbability, seed);
+        var dataBytesWithErrorCorrection = SimulationManager.SendThroughChannel(_originalImageData!, bitFlipProbability, seed);
         var imageBytesWithErrorCorrection = _originalImageMetadata!.Concat(dataBytesWithErrorCorrection).ToArray();
         ReceivedImageWithErrorCorrection = new Bitmap(new MemoryStream(imageBytesWithErrorCorrection));
     }
 
-    private static async Task<(List<byte>, List<byte>)> ReadBmpImageFromFile(IStorageFile file)
+    private static async Task<(List<byte> metadata, List<byte> data)> ReadBmpImageFromFile(IStorageFile file)
     {
         await using var stream = await file.OpenReadAsync();
         using var reader = new BinaryReader(stream);

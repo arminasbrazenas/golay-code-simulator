@@ -28,8 +28,8 @@ public class MessageSimulationViewModel : ViewModelBase
 
         var canDecodeMessage = this.WhenAnyValue(vm => vm.MessageFromChannel, m => GolayEncodedMessageValidator.Validate(m).IsValid);
 
-        SendMessageCommand = ReactiveCommand.Create(HandleSendMessageCommand, canSendMessage);
-        DecodeMessageCommand = ReactiveCommand.Create(HandleDecodeMessageCommand, canDecodeMessage);
+        SendMessageCommand = ReactiveCommand.Create(SendMessage, canSendMessage);
+        DecodeMessageCommand = ReactiveCommand.Create(DecodeMessage, canDecodeMessage);
         ErrorPositionsMessage = this.WhenAnyValue(vm => vm.EncodedMessage, vm => vm.MessageFromChannel, SetErrorPositionsMessage);
     }
 
@@ -87,7 +87,7 @@ public class MessageSimulationViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _decodedMessageInformation, value);
     }
 
-    private void HandleSendMessageCommand()
+    private void SendMessage()
     {
         var bitFlipProbability = BitFlipProbability.ParseDoubleCultureInvariant();
         var messageBytes = BinaryStringConverter.ToBytes(Message);
@@ -99,7 +99,7 @@ public class MessageSimulationViewModel : ViewModelBase
         MessageFromChannel = BinaryStringConverter.FromBytes(bytesFromChannel, Constants.CodewordLength);
     }
 
-    private void HandleDecodeMessageCommand()
+    private void DecodeMessage()
     {
         var bytesFromChannel = BinaryStringConverter.ToBytes(MessageFromChannel);
 

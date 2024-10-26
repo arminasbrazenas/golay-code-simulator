@@ -23,7 +23,7 @@ public class BinarySymmetricChannelTests
 
         Assert.Equal(message, messageFromChannel);
     }
-    
+
     [Fact]
     public void SimulateNoise_GivenCertainErrorProbability_FlipsAllBits()
     {

@@ -24,7 +24,7 @@ public class TextSimulationViewModel : ViewModelBase
             (p, t) => BitFlipProbabilityValidator.Validate(p).IsValid && GolayTextValidator.Validate(t).IsValid
         );
 
-        SendTextCommand = ReactiveCommand.Create(HandleSendTextCommand, canSendText);
+        SendTextCommand = ReactiveCommand.Create(SendText, canSendText);
     }
 
     public ICommand SendTextCommand { get; }
@@ -61,7 +61,7 @@ public class TextSimulationViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _receivedTextWithEncoding, value);
     }
 
-    private void HandleSendTextCommand()
+    private void SendText()
     {
         var messageBytes = Encoding.UTF8.GetBytes(Text).ToList();
         var bitFlipProbability = BitFlipProbability.ParseDoubleCultureInvariant();
@@ -70,7 +70,7 @@ public class TextSimulationViewModel : ViewModelBase
         var receivedBytesWithoutEncoding = BinarySymmetricChannel.SimulateNoise(messageBytes, bitFlipProbability, seed);
         ReceivedTextWithoutEncoding = Encoding.UTF8.GetString(receivedBytesWithoutEncoding.ToArray());
 
-        var receivedBytesWithEncoding = SendThroughChannelWithZeroPaddingIfNeeded(messageBytes, bitFlipProbability, seed);
+        var receivedBytesWithEncoding = SimulationManager.SendThroughChannel(messageBytes, bitFlipProbability, seed);
         ReceivedTextWithEncoding = Encoding.UTF8.GetString(receivedBytesWithEncoding.ToArray());
     }
 }
