@@ -7,7 +7,7 @@ public class BinarySymmetricChannelTests
     {
         List<byte> message = [0b0010_0110];
         const double probability = 0.5;
-        var messageFromChannel = BinarySymmetricChannel.SimulateNoise(message, probability);
+        var messageFromChannel = BinarySymmetricChannel.Simulate(message, probability);
 
         Assert.Equal(message.Count, messageFromChannel.Count);
         Assert.NotEqual(message, messageFromChannel);
@@ -19,7 +19,7 @@ public class BinarySymmetricChannelTests
         List<byte> message = [0b0010_0110];
         const double probability = 0;
 
-        var messageFromChannel = BinarySymmetricChannel.SimulateNoise(message, probability);
+        var messageFromChannel = BinarySymmetricChannel.Simulate(message, probability);
 
         Assert.Equal(message, messageFromChannel);
     }
@@ -31,7 +31,7 @@ public class BinarySymmetricChannelTests
         List<byte> expectedMessageFromChannel = [0b1101_1001];
         const double probability = 1;
 
-        var messageFromChannel = BinarySymmetricChannel.SimulateNoise(message, probability);
+        var messageFromChannel = BinarySymmetricChannel.Simulate(message, probability);
 
         Assert.Equal(expectedMessageFromChannel, messageFromChannel);
     }

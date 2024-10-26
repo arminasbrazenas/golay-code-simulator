@@ -13,8 +13,8 @@ public class TextSimulationViewModel : ViewModelBase
 {
     private string? _bitFlipProbability;
     private string? _text;
-    private string? _receivedTextWithoutEncoding;
-    private string? _receivedTextWithEncoding;
+    private string? _receivedTextWithoutErrorCorrection;
+    private string? _receivedTextWithErrorCorrection;
 
     public TextSimulationViewModel()
     {
@@ -49,28 +49,31 @@ public class TextSimulationViewModel : ViewModelBase
         }
     }
 
-    public string ReceivedTextWithoutEncoding
+    public string ReceivedTextWithoutErrorCorrection
     {
-        get => _receivedTextWithoutEncoding ?? string.Empty;
-        set => this.RaiseAndSetIfChanged(ref _receivedTextWithoutEncoding, value);
+        get => _receivedTextWithoutErrorCorrection ?? string.Empty;
+        set => this.RaiseAndSetIfChanged(ref _receivedTextWithoutErrorCorrection, value);
     }
 
-    public string ReceivedTextWithEncoding
+    public string ReceivedTextWithErrorCorrection
     {
-        get => _receivedTextWithEncoding ?? string.Empty;
-        set => this.RaiseAndSetIfChanged(ref _receivedTextWithEncoding, value);
+        get => _receivedTextWithErrorCorrection ?? string.Empty;
+        set => this.RaiseAndSetIfChanged(ref _receivedTextWithErrorCorrection, value);
     }
 
+    /// <summary>
+    /// Sends the text through a binary symmetric channel with and without error correction.
+    /// </summary>
     private void SendText()
     {
         var messageBytes = Encoding.UTF8.GetBytes(Text).ToList();
         var bitFlipProbability = BitFlipProbability.ParseDoubleCultureInvariant();
         var seed = Guid.NewGuid().GetHashCode();
 
-        var receivedBytesWithoutEncoding = BinarySymmetricChannel.SimulateNoise(messageBytes, bitFlipProbability, seed);
-        ReceivedTextWithoutEncoding = Encoding.UTF8.GetString(receivedBytesWithoutEncoding.ToArray());
+        var bytesWithoutErrorCorrection = BinarySymmetricChannel.Simulate(messageBytes, bitFlipProbability, seed);
+        ReceivedTextWithoutErrorCorrection = Encoding.UTF8.GetString(bytesWithoutErrorCorrection.ToArray());
 
-        var receivedBytesWithEncoding = SimulationManager.SendThroughChannel(messageBytes, bitFlipProbability, seed);
-        ReceivedTextWithEncoding = Encoding.UTF8.GetString(receivedBytesWithEncoding.ToArray());
+        var bytesWithErrorCorrection = SimulationManager.SendThroughChannel(messageBytes, bitFlipProbability, seed);
+        ReceivedTextWithErrorCorrection = Encoding.UTF8.GetString(bytesWithErrorCorrection.ToArray());
     }
 }

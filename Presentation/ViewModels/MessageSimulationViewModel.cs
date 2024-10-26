@@ -30,7 +30,7 @@ public class MessageSimulationViewModel : ViewModelBase
 
         SendMessageCommand = ReactiveCommand.Create(SendMessage, canSendMessage);
         DecodeMessageCommand = ReactiveCommand.Create(DecodeMessage, canDecodeMessage);
-        ErrorPositionsMessage = this.WhenAnyValue(vm => vm.EncodedMessage, vm => vm.MessageFromChannel, SetErrorPositionsMessage);
+        ErrorPositionsMessage = this.WhenAnyValue(vm => vm.EncodedMessage, vm => vm.MessageFromChannel, CreateErrorPositionsMessage);
     }
 
     public ICommand SendMessageCommand { get; }
@@ -87,30 +87,42 @@ public class MessageSimulationViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _decodedMessageInformation, value);
     }
 
+    /// <summary>
+    /// Encodes the message using Golay code and sends it through a binary symmetric channel.
+    /// </summary>
     private void SendMessage()
     {
         var bitFlipProbability = BitFlipProbability.ParseDoubleCultureInvariant();
         var messageBytes = BinaryStringConverter.ToBytes(Message);
 
         var encodedBytes = GolayEncoder.Encode(messageBytes);
-        EncodedMessage = BinaryStringConverter.FromBytes(encodedBytes, Constants.CodewordLength);
+        EncodedMessage = BinaryStringConverter.FromBytes(encodedBytes, multipleOf: Constants.CodewordLength);
 
-        var bytesFromChannel = BinarySymmetricChannel.SimulateNoise(encodedBytes, bitFlipProbability);
-        MessageFromChannel = BinaryStringConverter.FromBytes(bytesFromChannel, Constants.CodewordLength);
+        var bytesFromChannel = BinarySymmetricChannel.Simulate(encodedBytes, bitFlipProbability);
+        MessageFromChannel = BinaryStringConverter.FromBytes(bytesFromChannel, multipleOf: Constants.CodewordLength);
     }
 
+    /// <summary>
+    /// Decodes the message received from channel using Golay code.
+    /// </summary>
     private void DecodeMessage()
     {
         var bytesFromChannel = BinaryStringConverter.ToBytes(MessageFromChannel);
 
         var decodedBytes = GolayDecoder.Decode(bytesFromChannel);
-        DecodedMessage = BinaryStringConverter.FromBytes(decodedBytes, Constants.CodewordLength);
+        DecodedMessage = BinaryStringConverter.FromBytes(decodedBytes, multipleOf: Constants.CodewordLength);
 
         var informationBytes = GolayInformationParser.ParseDecodedMessage(decodedBytes);
-        DecodedMessageInformation = BinaryStringConverter.FromBytes(informationBytes, Constants.InformationLength);
+        DecodedMessageInformation = BinaryStringConverter.FromBytes(informationBytes, multipleOf: Constants.InformationLength);
     }
 
-    private static string? SetErrorPositionsMessage(string encodedMessage, string messageFromChannel)
+    /// <summary>
+    /// Creates error position message by comparing encoded message and message received from channel.
+    /// </summary>
+    /// <param name="encodedMessage">Encoded message.</param>
+    /// <param name="messageFromChannel">Message received from channel</param>
+    /// <returns>Error position message if encoded message and message from channel are valid; otherwise, null.</returns>
+    private static string? CreateErrorPositionsMessage(string encodedMessage, string messageFromChannel)
     {
         if (!GolayEncodedMessageValidator.Validate(messageFromChannel).IsValid || encodedMessage.Length != messageFromChannel.Length)
         {
@@ -121,8 +133,19 @@ public class MessageSimulationViewModel : ViewModelBase
         return FormatMessageFromErrorPositions(errorPositions);
     }
 
+    /// <summary>
+    /// Calculates positions at which errors occurred while sending through channel.
+    /// </summary>
+    /// <param name="encodedMessage">Encoded message.</param>
+    /// <param name="messageFromChannel">Message received from channel.</param>
+    /// <returns>Positions at which errors occurred.</returns>
     private static List<int> CalculateErrorPositions(string encodedMessage, string messageFromChannel)
     {
+        if (encodedMessage.Length != messageFromChannel.Length)
+        {
+            return [];
+        }
+        
         List<int> errorPositions = [];
         for (var i = 0; i < encodedMessage.Length; i++)
         {
@@ -135,6 +158,11 @@ public class MessageSimulationViewModel : ViewModelBase
         return errorPositions;
     }
 
+    /// <summary>
+    /// Formats a message to display to the user about the errors that occurred while sending the message through channel.
+    /// </summary>
+    /// <param name="errorPositions">Positions at which errors occurred.</param>
+    /// <returns>Error position message.</returns>
     private static string FormatMessageFromErrorPositions(List<int> errorPositions) =>
         errorPositions.Count switch
         {

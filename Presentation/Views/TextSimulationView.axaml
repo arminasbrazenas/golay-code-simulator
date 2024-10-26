@@ -20,10 +20,10 @@
         <Button Command="{Binding SendTextCommand}" Margin="0 12 0 24">Send text</Button>
         
         <TextBlock Margin="0 4">Received text without error correction:</TextBlock>
-        <TextBox Text="{Binding ReceivedTextWithoutEncoding}" Height="120" AcceptsReturn="True" TextWrapping="Wrap" IsEnabled="False" />
+        <TextBox Text="{Binding ReceivedTextWithoutErrorCorrection}" Height="120" AcceptsReturn="True" TextWrapping="Wrap" IsEnabled="False" />
         
         <TextBlock Margin="0 12 0 4">Received text with error correction:</TextBlock>
-        <TextBox Text="{Binding ReceivedTextWithEncoding}" Height="120" AcceptsReturn="True" TextWrapping="Wrap" IsEnabled="False" />
+        <TextBox Text="{Binding ReceivedTextWithErrorCorrection}" Height="120" AcceptsReturn="True" TextWrapping="Wrap" IsEnabled="False" />
     </StackPanel>
 
 </UserControl>

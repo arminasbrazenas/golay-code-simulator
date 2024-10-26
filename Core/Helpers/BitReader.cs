@@ -17,6 +17,10 @@ public class BitReader
         _blockMask = Utilities.CalculateBlockMask(blockSize);
     }
 
+    /// <summary>
+    /// Reads the next bit block.
+    /// </summary>
+    /// <returns>The block that was read, if there were enough bits left; otherwise, null.</returns>
     public uint? ReadNextBlock()
     {
         uint block = _buffer & _blockMask;
@@ -45,6 +49,9 @@ public class BitReader
         return block;
     }
 
+    /// <summary>
+    /// Reads bytes into the buffer.
+    /// </summary>
     private void ReadToBuffer()
     {
         _buffer = 0;

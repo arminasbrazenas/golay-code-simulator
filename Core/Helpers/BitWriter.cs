@@ -17,10 +17,14 @@ public class BitWriter
 
     public List<byte> Bytes { get; }
 
-    public void WriteBlock(uint value)
+    /// <summary>
+    /// Writes the given bit block.
+    /// </summary>
+    /// <param name="block">Bit block to write.</param>
+    public void WriteBlock(uint block)
     {
-        value &= _blockMask;
-        _buffer |= value >> _bufferSize;
+        block &= _blockMask;
+        _buffer |= block >> _bufferSize;
 
         uint newBuffer = 0;
         var newBufferSize = 0;
@@ -33,7 +37,7 @@ public class BitWriter
         {
             var bitsWritten = 32 - _bufferSize;
             _bufferSize = 32;
-            newBuffer = value << bitsWritten;
+            newBuffer = block << bitsWritten;
             newBufferSize = _blockSize - bitsWritten;
         }
 
@@ -45,6 +49,9 @@ public class BitWriter
         }
     }
 
+    /// <summary>
+    /// Flushes bytes from the buffer into the result bytes.
+    /// </summary>
     public void Flush()
     {
         var shift = 24;

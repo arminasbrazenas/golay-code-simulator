@@ -6,7 +6,14 @@ public class BinarySymmetricChannel
 {
     private static Random _random = new();
 
-    public static List<byte> SimulateNoise(IEnumerable<byte> message, double bitFlipProbability, int? seed = null)
+    /// <summary>
+    /// Simulates sending a message through a binary symmetric channel.
+    /// </summary>
+    /// <param name="message">Message to send through the channel.</param>
+    /// <param name="bitFlipProbability">Probability that a bit is flipped.</param>
+    /// <param name="seed">Seed to use for random number generator.</param>
+    /// <returns>Message received from the channel.</returns>
+    public static List<byte> Simulate(IEnumerable<byte> message, double bitFlipProbability, int? seed = null)
     {
         if (seed is not null)
         {
