@@ -60,7 +60,8 @@ public class Experiments
             random.NextBytes(nextBytes);
             message.AddRange(nextBytes);
 
-            double encodingMilliseconds = 0, decodingMilliseconds = 0;
+            double encodingMilliseconds = 0;
+            double decodingMilliseconds = 0;
 
             for (var j = 0; j < trialsPerMessageSize; j++)
             {
@@ -77,11 +78,11 @@ public class Experiments
                 encodingMilliseconds += encodingStopwatch.ElapsedMilliseconds;
                 decodingMilliseconds += decodingStopwatch.ElapsedMilliseconds;
             }
-            
+
             _testOutputHelper.WriteLine(
                 $"Message size: {message.Count} bytes; "
-                + $"Encoding: {encodingMilliseconds / trialsPerMessageSize} ms; "
-                + $"Decoding: {decodingMilliseconds / trialsPerMessageSize} ms"
+                    + $"Encoding: {encodingMilliseconds / trialsPerMessageSize} ms; "
+                    + $"Decoding: {decodingMilliseconds / trialsPerMessageSize} ms"
             );
         }
     }

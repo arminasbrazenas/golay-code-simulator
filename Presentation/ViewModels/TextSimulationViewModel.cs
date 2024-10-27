@@ -73,7 +73,7 @@ public class TextSimulationViewModel : ViewModelBase
         var bytesWithoutErrorCorrection = BinarySymmetricChannel.SimulateSending(messageBytes, bitFlipProbability, seed);
         ReceivedTextWithoutErrorCorrection = Encoding.UTF8.GetString(bytesWithoutErrorCorrection.ToArray());
 
-        var bytesWithErrorCorrection = SimulationManager.SendThroughChannel(messageBytes, bitFlipProbability, seed);
+        var bytesWithErrorCorrection = SimulationUtility.SendThroughChannel(messageBytes, bitFlipProbability, seed);
         ReceivedTextWithErrorCorrection = Encoding.UTF8.GetString(bytesWithErrorCorrection.ToArray());
     }
 }

@@ -87,7 +87,7 @@ public class ImageSimulationViewModel : ViewModelBase
         var imageBytesWithoutErrorCorrection = _originalImageMetadata!.Concat(dataBytesWithoutErrorCorrection).ToArray();
         ReceivedImageWithoutErrorCorrection = new Bitmap(new MemoryStream(imageBytesWithoutErrorCorrection));
 
-        var dataBytesWithErrorCorrection = SimulationManager.SendThroughChannel(_originalImageData!, bitFlipProbability, seed);
+        var dataBytesWithErrorCorrection = SimulationUtility.SendThroughChannel(_originalImageData!, bitFlipProbability, seed);
         var imageBytesWithErrorCorrection = _originalImageMetadata!.Concat(dataBytesWithErrorCorrection).ToArray();
         ReceivedImageWithErrorCorrection = new Bitmap(new MemoryStream(imageBytesWithErrorCorrection));
     }

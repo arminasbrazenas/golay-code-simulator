@@ -7,6 +7,7 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <RootNamespace>GolayCodeSimulator.Presentation</RootNamespace>
+        <AssemblyName>GolayCodeSimulator</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

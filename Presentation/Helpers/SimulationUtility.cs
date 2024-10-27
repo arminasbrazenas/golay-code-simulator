@@ -3,7 +3,7 @@ using GolayCodeSimulator.Core;
 
 namespace GolayCodeSimulator.Presentation.Helpers;
 
-public static class SimulationManager
+public static class SimulationUtility
 {
     /// <summary>
     /// Encodes information bytes using Golay code, sends it through a binary symmetric channel
