@@ -39,7 +39,11 @@ public class ImageSimulationViewModel : ViewModelBase
     public string BitFlipProbability
     {
         get => _bitFlipProbability ?? string.Empty;
-        set => this.RaiseAndSetIfChanged(ref _bitFlipProbability, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _bitFlipProbability, value);
+            BitFlipProbabilityValidator.Validate(value).ThrowOnFailure();
+        }
     }
 
     public Bitmap? ReceivedImageWithoutErrorCorrection
