@@ -27,7 +27,7 @@ public class Experiments
             for (var i = 0; i < trialsPerProbability; i++)
             {
                 var encodedBytes = GolayEncoder.Encode(message);
-                var bytesFromChannel = BinarySymmetricChannel.SimulateSending(encodedBytes, bitFlipProbability);
+                var bytesFromChannel = BinarySymmetricChannel.Send(encodedBytes, bitFlipProbability);
                 var decodedBytes = GolayDecoder.Decode(bytesFromChannel);
                 var receivedMessage = GolayInformationParser.ParseDecodedMessage(decodedBytes);
 
@@ -69,7 +69,7 @@ public class Experiments
                 var encodedBytes = GolayEncoder.Encode(message);
                 encodingStopwatch.Stop();
 
-                var bytesFromChannel = BinarySymmetricChannel.SimulateSending(encodedBytes, bitFlipProbability);
+                var bytesFromChannel = BinarySymmetricChannel.Send(encodedBytes, bitFlipProbability);
 
                 var decodingStopwatch = Stopwatch.StartNew();
                 GolayDecoder.Decode(bytesFromChannel);

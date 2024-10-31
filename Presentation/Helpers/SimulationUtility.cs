@@ -24,7 +24,7 @@ public static class SimulationUtility
         }
 
         var encodedBytes = GolayEncoder.Encode(bytes);
-        var bytesFromChannel = BinarySymmetricChannel.SimulateSending(encodedBytes, bitFlipProbability, seed);
+        var bytesFromChannel = BinarySymmetricChannel.Send(encodedBytes, bitFlipProbability, seed);
         var decodedBytes = GolayDecoder.Decode(bytesFromChannel);
         var informationBytes = GolayInformationParser.ParseDecodedMessage(decodedBytes);
 

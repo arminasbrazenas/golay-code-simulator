@@ -87,7 +87,7 @@ public class ImageSimulationViewModel : ViewModelBase
         var bitFlipProbability = BitFlipProbability.ParseDoubleCultureInvariant();
         var seed = Guid.NewGuid().GetHashCode();
 
-        var dataBytesWithoutErrorCorrection = BinarySymmetricChannel.SimulateSending(_originalImageData!, bitFlipProbability, seed);
+        var dataBytesWithoutErrorCorrection = BinarySymmetricChannel.Send(_originalImageData!, bitFlipProbability, seed);
         var imageBytesWithoutErrorCorrection = _originalImageMetadata!.Concat(dataBytesWithoutErrorCorrection).ToArray();
         ReceivedImageWithoutErrorCorrection = new Bitmap(new MemoryStream(imageBytesWithoutErrorCorrection));
 

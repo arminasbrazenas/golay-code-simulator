@@ -13,7 +13,7 @@ public class BinarySymmetricChannel
     /// <param name="bitFlipProbability">Probability that a bit is flipped.</param>
     /// <param name="seed">Seed to use for random number generator.</param>
     /// <returns>Message received from the channel.</returns>
-    public static List<byte> SimulateSending(IEnumerable<byte> message, double bitFlipProbability, int? seed = null)
+    public static List<byte> Send(IEnumerable<byte> message, double bitFlipProbability, int? seed = null)
     {
         if (seed is not null)
         {
